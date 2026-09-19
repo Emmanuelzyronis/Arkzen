@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: the toggle writes `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   Skymetrics parity token layer.
+
+   Two complete themes. Light: near-white cards on a soft grey canvas. Dark:
+   elevated charcoal cards on near-black. One vivid green accent, a green/red
+   delta pair, and nothing else carrying meaning.
+   ========================================================================== */
+
+:root {
+  --canvas: #f2f3f3;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --surface-3: #f4f4f5;
+  --line: #ecedef;
+  --line-strong: #dcdde1;
+  --fg: #0b0b0c;
+  --fg-soft: #55555c;
+  --fg-muted: #8a8a93;
+  --brand: #16a34a;
+  --brand-bright: #22c55e;
+  --brand-soft: #e9f9f0;
+  --up: #12874a;
+  --up-bg: #e9f9f0;
+  --down: #d93a3f;
+  --down-bg: #fdeceb;
+  --warn: #b45309;
+  --warn-bg: #fef3c7;
+  --hero: #111214;
+  --hero-fg: #f7f7f8;
+  --hero-muted: #9b9ba4;
+  --elevation-card: 0 1px 2px rgba(16, 17, 20, 0.04), 0 12px 32px -20px rgba(16, 17, 20, 0.18);
+  --elevation-panel: 0 1px 2px rgba(16, 17, 20, 0.05), 0 24px 60px -32px rgba(16, 17, 20, 0.28);
+  --glow: radial-gradient(120% 120% at 50% 0%, rgba(34, 197, 94, 0.1), transparent 62%);
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: #08080a;
+  --surface: #131316;
+  --surface-2: #17171b;
+  --surface-3: #1e1e23;
+  --line: #232329;
+  --line-strong: #303039;
+  --fg: #f7f7f8;
+  --fg-soft: #b3b3bc;
+  --fg-muted: #83838d;
+  --brand: #22c55e;
+  --brand-bright: #4ade80;
+  --brand-soft: rgba(34, 197, 94, 0.14);
+  --up: #4ade80;
+  --up-bg: rgba(34, 197, 94, 0.14);
+  --down: #f87171;
+  --down-bg: rgba(248, 113, 113, 0.14);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.14);
+  /* In dark mode the hero block lifts off the page instead of inverting. */
+  --hero: #1a1a1f;
+  --hero-fg: #f7f7f8;
+  --hero-muted: #8f8f99;
+  --elevation-card: 0 1px 0 rgba(255, 255, 255, 0.02), 0 14px 34px -24px rgba(0, 0, 0, 0.9);
+  --elevation-panel: 0 1px 0 rgba(255, 255, 255, 0.03), 0 30px 70px -36px rgba(0, 0, 0, 0.95);
+  --glow: radial-gradient(120% 120% at 50% 0%, rgba(34, 197, 94, 0.16), transparent 60%);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --color-fg-muted: var(--fg-muted);
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-soft: var(--brand-soft);
+  --color-up: var(--up);
+  --color-up-bg: var(--up-bg);
+  --color-down: var(--down);
+  --color-down-bg: var(--down-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-hero: var(--hero);
+  --color-hero-fg: var(--hero-fg);
+  --color-hero-muted: var(--hero-muted);
+
+  --radius-tile: 12px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+
+  --shadow-card: var(--elevation-card);
+  --shadow-panel: var(--elevation-panel);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.3s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html,
+  body {
+    background: var(--canvas);
+    color: var(--fg);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--brand-soft);
+    color: var(--fg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
