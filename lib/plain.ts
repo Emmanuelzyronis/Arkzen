@@ -46,13 +46,15 @@ export function bandLabel(band: string): string {
 /**
  * The readable name of a place opportunities come from.
  *
- * Source rows carry an adapter id — `reddit-public-json`, `arkzen-reviewed-corpus`
+ * Source rows carry an adapter id — `reddit-oauth`, `arkzen-reviewed-corpus`
  * — which is an implementation detail and must never reach the screen. Anything
  * unmapped degrades to title case rather than showing the raw id, so a newly
  * added source reads as "Hacker News" instead of "hn-algolia".
  */
 const SOURCE_LABEL: Record<string, string> = {
-  "reddit-public-json": "Reddit",
+  "reddit-oauth": "Reddit",
+  "reddit-public-json": "Reddit", // legacy id — kept so old DB rows still display correctly
+  "hn-who-is-hiring": "Hacker News",
   "arkzen-reviewed-corpus": "Reviewed captures",
 };
 

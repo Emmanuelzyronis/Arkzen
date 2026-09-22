@@ -44,7 +44,7 @@ export function normalizeRedditListing(
         author: { handle: `u/${post.author ?? "unknown"}` },
         publishedAt: new Date((post.created_utc ?? Date.now() / 1000) * 1000).toISOString(),
         capturedAt,
-        providerId: "reddit-public-json",
+        providerId: "reddit-oauth",
         provenance: {
           community: post.subreddit ?? community,
           flair: post.link_flair_text ?? "none",
