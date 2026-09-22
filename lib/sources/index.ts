@@ -2,9 +2,12 @@ import type { CandidateSignal, ServiceProfile } from "@/lib/domain/types";
 import { corpusSource } from "./corpus-source";
 import { hnSource } from "./hn";
 import { redditSource } from "./reddit";
+import { remoteokSource } from "./remoteok";
+import { remotiveSource } from "./remotive";
+import { wwrSource } from "./wwr";
 import type { RunStatus, SourceAdapter, SourceHealth } from "./types";
 
-export const sources: SourceAdapter[] = [redditSource, hnSource, corpusSource];
+export const sources: SourceAdapter[] = [redditSource, hnSource, remotiveSource, remoteokSource, wwrSource, corpusSource];
 
 export function getSource(id: string): SourceAdapter | undefined {
   return sources.find((source) => source.id === id);
@@ -81,5 +84,5 @@ export async function healthCheckAll(): Promise<SourceHealth[]> {
   return Promise.all(sources.map((source) => source.health()));
 }
 
-export { corpusSource, hnSource, redditSource };
+export { corpusSource, hnSource, redditSource, remoteokSource, remotiveSource, wwrSource };
 export type { SourceAdapter, RunStatus, SourceHealth };

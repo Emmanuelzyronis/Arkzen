@@ -55,6 +55,9 @@ const SOURCE_LABEL: Record<string, string> = {
   "reddit-oauth": "Reddit",
   "reddit-public-json": "Reddit", // legacy id — kept so old DB rows still display correctly
   "hn-who-is-hiring": "Hacker News",
+  "remotive": "Remotive",
+  "remoteok": "RemoteOK",
+  "weworkremotely": "We Work Remotely",
   "arkzen-reviewed-corpus": "Reviewed captures",
 };
 

@@ -25,18 +25,21 @@ vi.mock("@clerk/nextjs/server", () => ({
   auth: async () => ({ userId: MOCK_OWNER_ID }),
 }));
 
-// HN source makes real network calls. Return nothing in tests so the capture
+// Live sources make real network calls. Return nothing in tests so the capture
 // idempotency assertion (created = 0 on a pre-seeded corpus) stays deterministic.
-vi.mock("@/lib/sources/hn", () => ({
-  hnSource: {
-    id: "hn-who-is-hiring",
-    name: "Hacker News",
-    kind: "community",
+function mockLiveSource(id: string, name: string, kind: string) {
+  return {
+    id, name, kind,
     capabilities: () => ({ requiresCredentials: false, live: true, notes: "mocked in tests" }),
-    health: async () => ({ providerId: "hn-who-is-hiring", available: true, detail: "mocked", checkedAt: new Date().toISOString() }),
+    health: async () => ({ providerId: id, available: true, detail: "mocked", checkedAt: new Date().toISOString() }),
     search: async () => ({ status: "SUCCESS", detail: "mocked — no network calls in tests", signals: [] }),
-  },
-}));
+  };
+}
+
+vi.mock("@/lib/sources/hn", () => ({ hnSource: mockLiveSource("hn-who-is-hiring", "Hacker News", "community") }));
+vi.mock("@/lib/sources/remotive", () => ({ remotiveSource: mockLiveSource("remotive", "Remotive", "job-board") }));
+vi.mock("@/lib/sources/remoteok", () => ({ remoteokSource: mockLiveSource("remoteok", "RemoteOK", "job-board") }));
+vi.mock("@/lib/sources/wwr", () => ({ wwrSource: mockLiveSource("weworkremotely", "We Work Remotely", "job-board") }));
 
 let listRoute: typeof import("@/app/api/opportunities/[id]/route");
 let activitiesRoute: typeof import("@/app/api/opportunities/[id]/activities/route");
