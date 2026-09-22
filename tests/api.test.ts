@@ -25,6 +25,19 @@ vi.mock("@clerk/nextjs/server", () => ({
   auth: async () => ({ userId: MOCK_OWNER_ID }),
 }));
 
+// HN source makes real network calls. Return nothing in tests so the capture
+// idempotency assertion (created = 0 on a pre-seeded corpus) stays deterministic.
+vi.mock("@/lib/sources/hn", () => ({
+  hnSource: {
+    id: "hn-who-is-hiring",
+    name: "Hacker News",
+    kind: "community",
+    capabilities: () => ({ requiresCredentials: false, live: true, notes: "mocked in tests" }),
+    health: async () => ({ providerId: "hn-who-is-hiring", available: true, detail: "mocked", checkedAt: new Date().toISOString() }),
+    search: async () => ({ status: "SUCCESS", detail: "mocked — no network calls in tests", signals: [] }),
+  },
+}));
+
 let listRoute: typeof import("@/app/api/opportunities/[id]/route");
 let activitiesRoute: typeof import("@/app/api/opportunities/[id]/activities/route");
 let outcomeRoute: typeof import("@/app/api/opportunities/[id]/outcome/route");

@@ -53,15 +53,10 @@ async function findCurrentHiringThreadId(): Promise<string | null> {
   return thread?.objectID ?? null;
 }
 
-function buildCapabilityQuery(profile: ServiceProfile): string {
-  const terms = [
-    ...(profile.capabilities ?? []).slice(0, 4),
-    "remote",
-    "engineer",
-  ]
-    .join(" ")
-    .slice(0, 100);
-  return terms || "engineer developer remote";
+// Intentionally generic — HN job postings don't use the same vocabulary as
+// service profiles. Pull everything technical and let scoring filter it.
+function buildCapabilityQuery(_profile: ServiceProfile): string {
+  return "engineer developer remote";
 }
 
 /**
