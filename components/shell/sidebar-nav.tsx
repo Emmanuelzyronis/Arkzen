@@ -31,14 +31,26 @@ function NavRow({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "group flex h-9 items-center gap-2.5 rounded-full px-3 text-[13px] transition-colors",
+        "group relative flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[13px] transition-colors duration-150",
         collapsed && "justify-center px-0",
-        active ? "bg-surface-3 font-medium text-fg" : "text-fg-soft hover:bg-surface-3 hover:text-fg",
+        active
+          ? "bg-brand-soft font-medium text-brand"
+          : "text-fg-soft hover:bg-surface-3 hover:text-fg",
       )}
     >
+      {/* Left accent bar for active state */}
+      {active && !collapsed && (
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-brand"
+        />
+      )}
       <item.icon
         aria-hidden="true"
-        className={cn("size-[17px] shrink-0", active ? "text-brand" : "text-fg-muted group-hover:text-fg-soft")}
+        className={cn(
+          "size-[16px] shrink-0",
+          active ? "text-brand" : "text-fg-muted group-hover:text-fg-soft",
+        )}
       />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
@@ -65,11 +77,13 @@ export function SidebarNav({
 
   return (
     <>
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 pb-3 pt-2">
+      <nav aria-label="Main" className="flex-1 overflow-y-auto px-2 pb-3 pt-2">
         {NAV_GROUPS.map((group, groupIndex) => (
-          <div key={group.label ?? `group-${groupIndex}`} className={cn(groupIndex > 0 && "mt-5")}>
+          <div key={group.label ?? `group-${groupIndex}`} className={cn(groupIndex > 0 && "mt-4")}>
             {group.label && !collapsed && (
-              <p className="px-3 pb-1.5 text-[11px] font-medium text-fg-muted">{group.label}</p>
+              <p className="mb-1 px-2.5 text-[10.5px] font-semibold tracking-wider text-fg-muted uppercase">
+                {group.label}
+              </p>
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => (
@@ -86,7 +100,7 @@ export function SidebarNav({
         ))}
       </nav>
 
-      <div className="border-t border-line p-3">
+      <div className="border-t border-line p-2 pb-3">
         <div className="space-y-0.5">
           {FOOTER_NAV.map((item) => (
             <NavRow
@@ -98,8 +112,6 @@ export function SidebarNav({
             />
           ))}
         </div>
-        {/* Set apart from the destinations above it: this is the one row here
-            that leaves the app rather than moving within it. */}
         <div className="mt-1 border-t border-line pt-1">
           <SignOutButton collapsed={collapsed} />
         </div>

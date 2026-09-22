@@ -1,13 +1,14 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 
 import "./globals.css";
 import { AppShell } from "@/components/shell/app-shell";
 import { ThemeProvider, themeInitScript } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { defaultServiceProfile } from "@/lib/domain/service-profile";
+import { getServiceProfile } from "@/lib/data/repository";
+import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Arkzen — find people already asking for what you sell",
@@ -17,12 +18,26 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f3f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#08080a" },
+    { media: "(prefers-color-scheme: light)", color: "#f1f2f4" },
+    { media: "(prefers-color-scheme: dark)", color: "#08080b" },
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Read the operator's saved profile name for the shell. Falls back to the
+  // default when unauthenticated or when the DB call fails — sign-in and
+  // onboarding pages will render the shell without a real name.
+  let profileName = defaultServiceProfile.name;
+  try {
+    const { userId } = await auth();
+    if (userId) {
+      const saved = await getServiceProfile(userId);
+      if (saved) profileName = saved.name;
+    }
+  } catch {
+    // Non-fatal — use the default name.
+  }
+
   return (
     <ClerkProvider
       signInUrl="/sign-in"
@@ -32,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <html
         lang="en"
-        className={`${GeistSans.variable} ${GeistMono.variable}`}
+        className={GeistMono.variable}
         data-scroll-behavior="smooth"
         suppressHydrationWarning
       >
@@ -43,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <body>
           <ThemeProvider>
             <TooltipProvider delayDuration={200}>
-              <AppShell profileName={defaultServiceProfile.name}>{children}</AppShell>
+              <AppShell profileName={profileName}>{children}</AppShell>
             </TooltipProvider>
           </ThemeProvider>
         </body>

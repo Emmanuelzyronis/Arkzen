@@ -937,3 +937,106 @@ export async function getInsights(ownerId: string): Promise<Insights> {
 
 export type { RejectedSignal };
 export { buildOpportunities };
+
+// ---------------------------------------------------------------------------
+// Service profile
+// ---------------------------------------------------------------------------
+
+function profileFromRow(row: {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: string;
+  keywords: string;
+  negative_signals: string;
+  locations: string;
+  minimum_engagement: string | null;
+}): ServiceProfile {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    capabilities: JSON.parse(row.capabilities) as string[],
+    keywords: JSON.parse(row.keywords) as string[],
+    negativeSignals: JSON.parse(row.negative_signals) as string[],
+    locations: JSON.parse(row.locations) as string[],
+    minimumEngagement: row.minimum_engagement ?? undefined,
+  };
+}
+
+export async function getServiceProfile(ownerId: string): Promise<ServiceProfile | null> {
+  await ensureMigrated();
+  const driver = await getDriver();
+  const rows = await driver.query<{
+    id: string;
+    name: string;
+    description: string;
+    capabilities: string;
+    keywords: string;
+    negative_signals: string;
+    locations: string;
+    minimum_engagement: string | null;
+  }>(
+    `select id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement
+     from service_profiles where owner_id = ?`,
+    [ownerId],
+  );
+  return rows.length > 0 ? profileFromRow(rows[0]) : null;
+}
+
+export async function upsertServiceProfile(
+  ownerId: string,
+  data: {
+    name: string;
+    description: string;
+    capabilities: string[];
+    keywords: string[];
+    negativeSignals: string[];
+    locations: string[];
+    minimumEngagement?: string;
+  },
+): Promise<ServiceProfile> {
+  await ensureMigrated();
+  const driver = await getDriver();
+  const existing = await getServiceProfile(ownerId);
+  const id = existing?.id ?? `profile_${randomUUID()}`;
+  const now = nowIso();
+
+  await driver.run(
+    `insert into service_profiles (id, owner_id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement, created_at, updated_at)
+     values (?,?,?,?,?,?,?,?,?,?,?)
+     on conflict (owner_id) do update set
+       name = excluded.name,
+       description = excluded.description,
+       capabilities = excluded.capabilities,
+       keywords = excluded.keywords,
+       negative_signals = excluded.negative_signals,
+       locations = excluded.locations,
+       minimum_engagement = excluded.minimum_engagement,
+       updated_at = excluded.updated_at`,
+    [
+      id,
+      ownerId,
+      data.name,
+      data.description,
+      JSON.stringify(data.capabilities),
+      JSON.stringify(data.keywords),
+      JSON.stringify(data.negativeSignals),
+      JSON.stringify(data.locations),
+      data.minimumEngagement ?? null,
+      now,
+      now,
+    ],
+  );
+
+  return {
+    id,
+    name: data.name,
+    description: data.description,
+    capabilities: data.capabilities,
+    keywords: data.keywords,
+    negativeSignals: data.negativeSignals,
+    locations: data.locations,
+    minimumEngagement: data.minimumEngagement,
+  };
+}

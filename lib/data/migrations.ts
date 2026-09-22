@@ -114,6 +114,22 @@ export const MIGRATIONS: string[] = [
      checked_at text not null,
      primary key (owner_id, provider_id)
    )`,
+  // The operator's service profile. One row per owner. Capabilities, keywords,
+  // and negative signals are stored as JSON arrays. Null means the operator has
+  // not completed onboarding yet — the app redirects until this row exists.
+  `create table if not exists service_profiles (
+     id text not null,
+     owner_id text not null primary key,
+     name text not null,
+     description text not null,
+     capabilities text not null,
+     keywords text not null,
+     negative_signals text not null,
+     locations text not null,
+     minimum_engagement text,
+     created_at text not null,
+     updated_at text not null
+   )`,
 ];
 
 async function columnExists(driver: SqlDriver, table: string, column: string): Promise<boolean> {

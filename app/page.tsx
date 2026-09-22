@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
 import { BarChart, FunnelChart, Gauge, SegmentedColumn, TrendChart } from "@/components/charts/charts";
@@ -7,7 +8,7 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { DeltaPill, Dot, Pill } from "@/components/ui/pill";
 import { busiestIndex, countPerBucket, runningRate, share } from "@/lib/charts";
 import { requirePageUser } from "@/lib/api-auth";
-import { listOpportunities, listSourceHealth, type OpportunityListItem } from "@/lib/data/repository";
+import { listOpportunities, listSourceHealth, getServiceProfile, type OpportunityListItem } from "@/lib/data/repository";
 import { categoryLabel } from "@/lib/domain/category";
 import { humanizeAge } from "@/lib/domain/text";
 import { change, count, percent, sourceLabel } from "@/lib/plain";
@@ -25,6 +26,10 @@ export default async function OverviewPage({
   const { range, from, to } = await searchParams;
   // The signed-in person, and therefore the only rows this page can read.
   const ownerId = await requirePageUser();
+
+  // First-time visitors who have not set up their profile go to onboarding.
+  const profile = await getServiceProfile(ownerId);
+  if (!profile) redirect("/onboarding");
   const [items, health] = await Promise.all([listOpportunities(ownerId), listSourceHealth(ownerId)]);
 
   const now = new Date();

@@ -1,70 +1,74 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
 
 /* Class-based dark mode: the toggle writes `.dark` on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   Skymetrics parity token layer.
+   ArkZen token layer.
 
-   Two complete themes. Light: near-white cards on a soft grey canvas. Dark:
-   elevated charcoal cards on near-black. One vivid green accent, a green/red
-   delta pair, and nothing else carrying meaning.
+   Two complete themes. Light: near-white cards on a cool-grey canvas. Dark:
+   elevated zinc cards on near-black. Indigo brand accent (intelligence),
+   amber action accent (capture / CTA), green/red delta pair.
    ========================================================================== */
 
 :root {
-  --canvas: #f2f3f3;
+  --canvas: #f1f2f4;
   --surface: #ffffff;
-  --surface-2: #fafafa;
-  --surface-3: #f4f4f5;
-  --line: #ecedef;
-  --line-strong: #dcdde1;
-  --fg: #0b0b0c;
-  --fg-soft: #55555c;
-  --fg-muted: #8a8a93;
-  --brand: #16a34a;
-  --brand-bright: #22c55e;
-  --brand-soft: #e9f9f0;
-  --up: #12874a;
+  --surface-2: #f8f9fa;
+  --surface-3: #f1f2f4;
+  --line: #e4e6ea;
+  --line-strong: #d0d3da;
+  --fg: #0b0c10;
+  --fg-soft: #4b5063;
+  --fg-muted: #868ca0;
+  --brand: #6366f1;
+  --brand-bright: #818cf8;
+  --brand-soft: rgba(99, 102, 241, 0.1);
+  --accent: #f59e0b;
+  --accent-fg: #000000;
+  --up: #16a34a;
   --up-bg: #e9f9f0;
   --down: #d93a3f;
   --down-bg: #fdeceb;
   --warn: #b45309;
   --warn-bg: #fef3c7;
-  --hero: #111214;
-  --hero-fg: #f7f7f8;
-  --hero-muted: #9b9ba4;
-  --elevation-card: 0 1px 2px rgba(16, 17, 20, 0.04), 0 12px 32px -20px rgba(16, 17, 20, 0.18);
-  --elevation-panel: 0 1px 2px rgba(16, 17, 20, 0.05), 0 24px 60px -32px rgba(16, 17, 20, 0.28);
-  --glow: radial-gradient(120% 120% at 50% 0%, rgba(34, 197, 94, 0.1), transparent 62%);
+  --hero: #0f1015;
+  --hero-fg: #f7f8fa;
+  --hero-muted: #9295a4;
+  --elevation-card: 0 1px 2px rgba(16, 17, 20, 0.04), 0 12px 32px -20px rgba(16, 17, 20, 0.14);
+  --elevation-panel: 0 1px 2px rgba(16, 17, 20, 0.05), 0 24px 60px -32px rgba(16, 17, 20, 0.22);
+  --glow: radial-gradient(120% 120% at 50% 0%, rgba(99, 102, 241, 0.09), transparent 62%);
   color-scheme: light;
 }
 
 .dark {
-  --canvas: #08080a;
-  --surface: #131316;
-  --surface-2: #17171b;
-  --surface-3: #1e1e23;
-  --line: #232329;
-  --line-strong: #303039;
-  --fg: #f7f7f8;
-  --fg-soft: #b3b3bc;
-  --fg-muted: #83838d;
-  --brand: #22c55e;
-  --brand-bright: #4ade80;
-  --brand-soft: rgba(34, 197, 94, 0.14);
+  --canvas: #08080b;
+  --surface: #111116;
+  --surface-2: #16161c;
+  --surface-3: #1d1d25;
+  --line: #222229;
+  --line-strong: #2e2e38;
+  --fg: #f4f5f9;
+  --fg-soft: #b0b3c4;
+  --fg-muted: #7a7d90;
+  --brand: #818cf8;
+  --brand-bright: #a5b4fc;
+  --brand-soft: rgba(129, 140, 248, 0.14);
+  --accent: #fbbf24;
+  --accent-fg: #000000;
   --up: #4ade80;
-  --up-bg: rgba(34, 197, 94, 0.14);
+  --up-bg: rgba(74, 222, 128, 0.14);
   --down: #f87171;
   --down-bg: rgba(248, 113, 113, 0.14);
   --warn: #fbbf24;
   --warn-bg: rgba(251, 191, 36, 0.14);
-  /* In dark mode the hero block lifts off the page instead of inverting. */
-  --hero: #1a1a1f;
-  --hero-fg: #f7f7f8;
-  --hero-muted: #8f8f99;
-  --elevation-card: 0 1px 0 rgba(255, 255, 255, 0.02), 0 14px 34px -24px rgba(0, 0, 0, 0.9);
-  --elevation-panel: 0 1px 0 rgba(255, 255, 255, 0.03), 0 30px 70px -36px rgba(0, 0, 0, 0.95);
-  --glow: radial-gradient(120% 120% at 50% 0%, rgba(34, 197, 94, 0.16), transparent 60%);
+  --hero: #141418;
+  --hero-fg: #f4f5f9;
+  --hero-muted: #8b8ea0;
+  --elevation-card: 0 1px 0 rgba(255, 255, 255, 0.02), 0 14px 34px -24px rgba(0, 0, 0, 0.85);
+  --elevation-panel: 0 1px 0 rgba(255, 255, 255, 0.03), 0 30px 70px -36px rgba(0, 0, 0, 0.92);
+  --glow: radial-gradient(120% 120% at 50% 0%, rgba(129, 140, 248, 0.14), transparent 60%);
   color-scheme: dark;
 }
 
@@ -81,6 +85,8 @@
   --color-brand: var(--brand);
   --color-brand-bright: var(--brand-bright);
   --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
   --color-up: var(--up);
   --color-up-bg: var(--up-bg);
   --color-down: var(--down);
@@ -91,24 +97,24 @@
   --color-hero-fg: var(--hero-fg);
   --color-hero-muted: var(--hero-muted);
 
-  --radius-tile: 12px;
-  --radius-card: 14px;
-  --radius-panel: 18px;
+  --radius-tile: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
 
   --shadow-card: var(--elevation-card);
   --shadow-panel: var(--elevation-panel);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade: fade 0.3s ease both;
+  --animate-rise: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.25s ease both;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;

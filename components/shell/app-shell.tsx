@@ -19,8 +19,12 @@ export function AppShell({
   const [navOpen, setNavOpen] = useState(false);
   const pathname = usePathname();
 
-  // Sign-in and sign-up stand on their own — no sidebar, no topbar.
-  if (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up")) {
+  // Sign-in, sign-up, and onboarding stand on their own — no sidebar, no topbar.
+  if (
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up") ||
+    pathname.startsWith("/onboarding")
+  ) {
     return <ToastProvider>{children}</ToastProvider>;
   }
 
