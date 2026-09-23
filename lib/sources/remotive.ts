@@ -76,24 +76,55 @@ export const remotiveSource: SourceAdapter = {
 
   async search(_profile: ServiceProfile, limit: number): Promise<SearchResult> {
     const capturedAt = new Date().toISOString();
-    const categories = ["software-dev", "devops-sysadmin"];
+    // Prefer contract/freelance listings; fall back to all software roles when
+    // those categories are sparse so the source still contributes signals.
+    const contractQueries = [
+      `${API_BASE}?category=software-dev&job_type=contract&limit=50`,
+      `${API_BASE}?category=software-dev&job_type=freelance&limit=50`,
+      `${API_BASE}?category=devops-sysadmin&job_type=contract&limit=25`,
+    ];
+    const fallbackQueries = [
+      `${API_BASE}?category=software-dev&limit=50`,
+      `${API_BASE}?category=devops-sysadmin&limit=25`,
+    ];
 
-    try {
+    async function fetchJobs(urls: string[]): Promise<RemotiveJob[]> {
       const results = await Promise.all(
-        categories.map(async (cat) => {
-          const res = await fetch(`${API_BASE}?category=${cat}&limit=50`, {
-            signal: AbortSignal.timeout(TIMEOUT_MS),
-          });
+        urls.map(async (url) => {
+          const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) });
           if (!res.ok) return [] as RemotiveJob[];
           const data = (await res.json()) as RemotiveResponse;
           return data.jobs ?? [];
         }),
       );
+      // Deduplicate by id
+      const seen = new Set<number>();
+      const merged: RemotiveJob[] = [];
+      for (const batch of results) {
+        for (const job of batch) {
+          if (!seen.has(job.id)) {
+            seen.add(job.id);
+            merged.push(job);
+          }
+        }
+      }
+      return merged;
+    }
 
-      const contractTypes = new Set(["contract", "freelance", "part_time"]);
-      const jobs = results.flat().filter((job) => contractTypes.has(job.job_type?.toLowerCase() ?? ""));
+    try {
+      let jobs = await fetchJobs(contractQueries);
+      let usedFallback = false;
+
       if (jobs.length === 0) {
-        return { status: "PROVIDER_ERROR", detail: "Remotive returned no contract/freelance listings.", signals: [] };
+        // No dedicated contract listings right now — fall back to all software
+        // roles so the source still contributes. The scoring pipeline will
+        // rank relevance; the source's job is to supply candidates.
+        jobs = await fetchJobs(fallbackQueries);
+        usedFallback = true;
+      }
+
+      if (jobs.length === 0) {
+        return { status: "PROVIDER_ERROR", detail: "Remotive returned no listings.", signals: [] };
       }
 
       const signals: CandidateSignal[] = jobs.slice(0, limit).map((job) => {
@@ -125,7 +156,9 @@ export const remotiveSource: SourceAdapter = {
 
       return {
         status: "SUCCESS",
-        detail: `${signals.length} job listings from Remotive (${categories.join(", ")}).`,
+        detail: usedFallback
+          ? `${signals.length} job listings from Remotive (all software roles — no contract-only listings right now).`
+          : `${signals.length} contract/freelance listings from Remotive.`,
         signals,
       };
     } catch (error) {

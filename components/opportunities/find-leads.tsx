@@ -79,10 +79,10 @@ export function FindLeads() {
 
       if (result.created > 0) {
         notify(
-          `Found ${result.created} new ${result.created === 1 ? "lead" : "leads"} out of ${result.observed} posts read.`,
+          `Found ${result.created} new ${result.created === 1 ? "listing" : "listings"} out of ${result.observed} checked.`,
         );
       } else if (result.observed === 0) {
-        notify("Nothing came back from your sources just now.", "error");
+        notify("Nothing came back from your sources right now. Try again in a moment.", "error");
       } else {
         notify(`Nothing new — you already have all ${result.kept} of these.`);
       }
@@ -107,7 +107,7 @@ export function FindLeads() {
   return (
     <Button type="button" variant="secondary" size="sm" onClick={run} disabled={running}>
       <Search aria-hidden="true" className="size-3.5" />
-      {running ? "Looking…" : "Find new leads"}
+      {running ? "Looking…" : "Find new listings"}
     </Button>
   );
 }

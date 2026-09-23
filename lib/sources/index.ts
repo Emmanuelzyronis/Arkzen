@@ -46,7 +46,7 @@ export async function acquireAll(options?: {
   const signals: CandidateSignal[] = [];
   const runs: SourceRun[] = [];
 
-  const mode = profile.mode ?? "lead-gen";
+  const mode = profile.mode ?? "job-search";
   const activeSources = sources.filter((source) => {
     const caps = source.capabilities();
     if (!caps.modes || caps.modes.length === 0) return true;
