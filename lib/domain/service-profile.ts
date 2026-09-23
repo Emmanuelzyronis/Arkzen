@@ -7,6 +7,7 @@ import type { ServiceProfile } from "./types";
 export const defaultServiceProfile: ServiceProfile = {
   id: "profile-ai-product-engineering",
   name: "AI product engineering for small teams",
+  mode: "job-search",
   description:
     "Independent engineer who ships AI-assisted internal tools, workflow automations and product web apps for teams of 5-60 people.",
   capabilities: [
