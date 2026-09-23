@@ -51,7 +51,7 @@ export default async function SourcesPage({
       ) : (
         <EmptyState
           title="Nothing to group yet"
-          body="No opportunities have been found, so there is nothing to compare. Run a search from the opportunities list and this fills up."
+          body="No leads yet — once you hit Find leads the pipeline fills up and sources start showing here."
         />
       )}
     </div>

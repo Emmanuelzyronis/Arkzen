@@ -1,11 +1,13 @@
 import type { CandidateSignal, ServiceProfile } from "@/lib/domain/types";
 import { hnSource } from "./hn";
-import { remoteokSource } from "./remoteok";
-import { remotiveSource } from "./remotive";
+import { redditArcticSource } from "./reddit-arctic";
 import type { RunStatus, SourceAdapter, SourceHealth } from "./types";
 
-// We Work Remotely removed: Cloudflare blocks server-side requests (403).
-export const sources: SourceAdapter[] = [hnSource, remotiveSource, remoteokSource];
+// Lead-gen sources only.
+// HN "Who is hiring?" — verified company demand, no auth.
+// Reddit via Arctic Shift — forhire/freelance_forhire/entrepreneur/startups,
+//   bypasses Azure IP blocks using the open-source Arctic Shift archiver.
+export const sources: SourceAdapter[] = [hnSource, redditArcticSource];
 
 export function getSource(id: string): SourceAdapter | undefined {
   return sources.find((source) => source.id === id);
@@ -46,7 +48,7 @@ export async function acquireAll(options?: {
   const signals: CandidateSignal[] = [];
   const runs: SourceRun[] = [];
 
-  const mode = profile.mode ?? "job-search";
+  const mode = profile.mode ?? "lead-gen";
   const activeSources = sources.filter((source) => {
     const caps = source.capabilities();
     if (!caps.modes || caps.modes.length === 0) return true;
@@ -93,5 +95,5 @@ export async function healthCheckAll(): Promise<SourceHealth[]> {
   return Promise.all(sources.map((source) => source.health()));
 }
 
-export { hnSource, remoteokSource, remotiveSource };
+export { hnSource, redditArcticSource };
 export type { SourceAdapter, RunStatus, SourceHealth };

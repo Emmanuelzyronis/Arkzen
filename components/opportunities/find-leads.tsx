@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { CheckCircle, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -51,10 +51,22 @@ function blockedSources(runs: CaptureRun[] | undefined): string[] {
     .map((run) => run.sourceName);
 }
 
+const SEARCH_STEPS = ["Looking for leads…", "Scanning sources…", "Almost there…"] as const;
+
 export function FindLeads() {
   const router = useRouter();
   const { notify } = useToast();
   const [running, setRunning] = useState(false);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [foundFlash, setFoundFlash] = useState(false);
+
+  useEffect(() => {
+    if (!running) { setStepIdx(0); return; }
+    const id = setInterval(() => {
+      setStepIdx((i) => Math.min(i + 1, SEARCH_STEPS.length - 1));
+    }, 7000);
+    return () => clearInterval(id);
+  }, [running]);
 
   async function run() {
     setRunning(true);
@@ -78,8 +90,10 @@ export function FindLeads() {
       const blocked = blockedSources(result.runs);
 
       if (result.created > 0) {
+        setFoundFlash(true);
+        setTimeout(() => setFoundFlash(false), 2800);
         notify(
-          `Found ${result.created} new ${result.created === 1 ? "listing" : "listings"} out of ${result.observed} checked.`,
+          `Found ${result.created} new ${result.created === 1 ? "lead" : "leads"} out of ${result.observed} checked.`,
         );
       } else if (result.observed === 0) {
         notify("Nothing came back from your sources right now. Try again in a moment.", "error");
@@ -104,10 +118,30 @@ export function FindLeads() {
     }
   }
 
+  const label = foundFlash
+    ? "Leads found!"
+    : running
+    ? SEARCH_STEPS[stepIdx]
+    : "Find leads";
+
   return (
-    <Button type="button" variant="secondary" size="sm" onClick={run} disabled={running}>
-      <Search aria-hidden="true" className="size-3.5" />
-      {running ? "Looking…" : "Find new listings"}
+    <Button
+      type="button"
+      variant={foundFlash ? "default" : "secondary"}
+      size="sm"
+      onClick={run}
+      disabled={running}
+      className="transition-all duration-300"
+    >
+      {foundFlash ? (
+        <CheckCircle aria-hidden="true" className="size-3.5 text-green-400" />
+      ) : (
+        <Search
+          aria-hidden="true"
+          className={`size-3.5 ${running ? "animate-pulse" : ""}`}
+        />
+      )}
+      <span className="transition-all duration-300">{label}</span>
     </Button>
   );
 }

@@ -8,7 +8,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { DeltaPill, Dot, Pill } from "@/components/ui/pill";
 import { busiestIndex, countPerBucket, runningRate, share } from "@/lib/charts";
 import { requirePageUser } from "@/lib/api-auth";
-import { listOpportunities, listSourceHealth, getServiceProfile, type OpportunityListItem } from "@/lib/data/repository";
+import { listOpportunities, listSourceHealth, listAcquisitionRuns, getServiceProfile, type OpportunityListItem } from "@/lib/data/repository";
+import { summariseRun } from "@/lib/insights";
 import { categoryLabel } from "@/lib/domain/category";
 import { humanizeAge } from "@/lib/domain/text";
 import { change, count, percent, sourceLabel } from "@/lib/plain";
@@ -30,7 +31,12 @@ export default async function OverviewPage({
   // First-time visitors who have not set up their profile go to onboarding.
   const profile = await getServiceProfile(ownerId);
   if (!profile) redirect("/onboarding");
-  const [items, health] = await Promise.all([listOpportunities(ownerId), listSourceHealth(ownerId)]);
+  const [items, health, rawRuns] = await Promise.all([
+    listOpportunities(ownerId),
+    listSourceHealth(ownerId),
+    listAcquisitionRuns(ownerId, 4),
+  ]);
+  const recentRuns = rawRuns.map(summariseRun);
 
   const now = new Date();
   // "All time" has no start of its own, so the oldest post defines it.
@@ -347,6 +353,31 @@ export default async function OverviewPage({
           </CardBody>
         </Card>
       </section>
+
+      <Card>
+        <CardHeader title="Recent searches" subtitle="The last few times Find leads ran, and what came back." />
+        <CardBody className="space-y-2 pt-2">
+          {recentRuns.map((run) => (
+            <div key={run.id} className="rounded-tile border border-line px-3.5 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[13px] font-medium text-fg">{run.headline}</p>
+                <span className="shrink-0 text-[12px] text-fg-muted">{humanizeAge(run.completedAt)}</span>
+              </div>
+              <p className="mt-1 text-[12px] tabular-nums text-fg-muted">{run.breakdown}</p>
+              {run.blocked.length > 0 && (
+                <p className="mt-2 rounded-tile bg-warn-bg px-2.5 py-1.5 text-[12px] leading-relaxed text-fg">
+                  {run.blocked.join(", and ")}.
+                </p>
+              )}
+            </div>
+          ))}
+          {recentRuns.length === 0 && (
+            <p className="py-6 text-center text-[13px] text-fg-muted">
+              No searches yet. Hit Find leads and the history shows up here.
+            </p>
+          )}
+        </CardBody>
+      </Card>
     </div>
   );
 }

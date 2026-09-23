@@ -112,3 +112,51 @@ export async function completeJson(options: {
 export function aiMode(): "provider" | "deterministic" {
   return getLlmConfig() ? "provider" : "deterministic";
 }
+
+/**
+ * Multi-turn plain-text chat — for the assistant page, where the full
+ * conversation history is passed on every turn and the response is free prose,
+ * not a JSON schema.
+ */
+export async function completeChat(options: {
+  system: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  maxTokens?: number;
+  timeoutMs?: number;
+}): Promise<CompletionOutcome> {
+  const config = getLlmConfig();
+  if (!config) return { ok: false, error: "No AI provider configured" };
+
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (config.style === "azure") headers["api-key"] = config.apiKey;
+  else headers.authorization = `Bearer ${config.apiKey}`;
+
+  try {
+    const response = await fetch(config.baseUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: config.model,
+        messages: [{ role: "system", content: options.system }, ...options.messages],
+        max_completion_tokens: options.maxTokens ?? 1200,
+      }),
+      signal: AbortSignal.timeout(options.timeoutMs ?? 45_000),
+    });
+
+    if (!response.ok) {
+      const detail = (await response.text().catch(() => "")).slice(0, 240);
+      return { ok: false, error: `Provider returned HTTP ${response.status}${detail ? `: ${detail}` : ""}` };
+    }
+    const payload = (await response.json()) as {
+      choices?: Array<{ finish_reason?: string; message?: { content?: string } }>;
+    };
+    const choice = payload.choices?.[0];
+    const text = choice?.message?.content;
+    if (!text) {
+      return { ok: false, error: "Provider returned an empty reply" };
+    }
+    return { ok: true, text: text.trim(), providerId: config.providerId };
+  } catch (error) {
+    return { ok: false, error: `Provider request failed: ${(error as Error).message}` };
+  }
+}

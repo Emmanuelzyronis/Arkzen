@@ -52,12 +52,10 @@ export function bandLabel(band: string): string {
  * added source reads as "Hacker News" instead of "hn-algolia".
  */
 const SOURCE_LABEL: Record<string, string> = {
-  "reddit-oauth": "Reddit",
-  "reddit-public-json": "Reddit", // legacy id — kept so old DB rows still display correctly
+  "arctic-reddit": "Reddit",
+  "reddit-oauth": "Reddit",        // legacy ids — kept so old DB rows still display correctly
+  "reddit-public-json": "Reddit",
   "hn-who-is-hiring": "Hacker News",
-  "remotive": "Remotive",
-  "remoteok": "RemoteOK",
-  "weworkremotely": "We Work Remotely",
   "arkzen-reviewed-corpus": "Reviewed captures",
 };
 

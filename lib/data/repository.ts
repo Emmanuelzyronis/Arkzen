@@ -868,6 +868,52 @@ export async function getServiceProfile(ownerId: string): Promise<ServiceProfile
   return rows.length > 0 ? profileFromRow(rows[0]) : null;
 }
 
+// ---------------------------------------------------------------------------
+// Assistant chat messages
+// ---------------------------------------------------------------------------
+
+export interface AssistantMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+}
+
+export async function listAssistantMessages(ownerId: string, limit = 40): Promise<AssistantMessage[]> {
+  await ensureReady(ownerId);
+  const driver = await getDriver();
+  const rows = await driver.query<{ id: string; role: string; content: string; created_at: string }>(
+    `select id, role, content, created_at from assistant_messages
+     where owner_id = ? order by created_at asc limit ?`,
+    [ownerId, limit],
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    role: row.role as "user" | "assistant",
+    content: row.content,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function insertAssistantMessage(
+  ownerId: string,
+  data: { role: "user" | "assistant"; content: string },
+): Promise<AssistantMessage> {
+  await ensureReady(ownerId);
+  const driver = await getDriver();
+  const message: AssistantMessage = {
+    id: `am_${randomUUID()}`,
+    role: data.role,
+    content: data.content,
+    createdAt: nowIso(),
+  };
+  await driver.run(
+    `insert into assistant_messages (id, owner_id, role, content, created_at) values (?,?,?,?,?)`,
+    [message.id, ownerId, message.role, message.content, message.createdAt],
+  );
+  return message;
+}
+
 export async function upsertServiceProfile(
   ownerId: string,
   data: {

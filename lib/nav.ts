@@ -1,15 +1,11 @@
 import {
-  BarChart3,
-  Bookmark,
   CheckCircle2,
   FolderOpen,
   Globe,
   LayoutDashboard,
-  LifeBuoy,
   Clock,
   Settings,
   Sparkles,
-  Tags,
   Target,
   type LucideIcon,
 } from "lucide-react";
@@ -32,13 +28,13 @@ export const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         label: "Overview",
         icon: LayoutDashboard,
         exact: true,
-        subtitle: "How your search is doing, and what needs you today.",
+        subtitle: "Your lead pipeline at a glance — what's come in and what needs action.",
       },
       {
         href: "/assistant",
         label: "Assistant",
         icon: Sparkles,
-        subtitle: "Ask about any opportunity and get an answer grounded in what was actually said.",
+        subtitle: "Chat with your pipeline — ask anything, get answers grounded in your real leads.",
       },
     ],
   },
@@ -74,25 +70,12 @@ export const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   {
     label: "Where they come from",
     items: [
-      { href: "/sources", label: "Sources", icon: Globe, subtitle: "Which places are actually producing good leads." },
-      { href: "/categories", label: "Categories", icon: Tags, subtitle: "What people are asking for, grouped." },
-      {
-        href: "/insights",
-        label: "Insights",
-        icon: BarChart3,
-        subtitle: "The numbers behind the search, measured from real activity.",
-      },
+      { href: "/sources", label: "Sources", icon: Globe, subtitle: "Which places are sending the best leads right now." },
     ],
   },
 ];
 
 export const FOOTER_NAV: NavItem[] = [
-  {
-    href: "/help",
-    label: "Help and support",
-    icon: LifeBuoy,
-    subtitle: "What Arkzen does, and what the words on these screens mean.",
-  },
   {
     href: "/settings",
     label: "Settings",

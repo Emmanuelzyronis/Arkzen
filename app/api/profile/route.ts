@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "name and description are required" }, { status: 400 });
   }
 
-  const mode = body.mode === "job-search" ? "job-search" : "lead-gen";
+  const mode: "lead-gen" = "lead-gen";
 
   const profile = await upsertServiceProfile(session.userId, {
     name,

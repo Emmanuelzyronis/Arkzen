@@ -114,6 +114,14 @@ export const MIGRATIONS: string[] = [
      checked_at text not null,
      primary key (owner_id, provider_id)
    )`,
+  `create table if not exists assistant_messages (
+     id text primary key,
+     owner_id text not null,
+     role text not null,
+     content text not null,
+     created_at text not null
+   )`,
+  `create index if not exists assistant_messages_owner_idx on assistant_messages(owner_id, created_at)`,
   // The operator's service profile. One row per owner. Capabilities, keywords,
   // and negative signals are stored as JSON arrays. Null means the operator has
   // not completed onboarding yet — the app redirects until this row exists.

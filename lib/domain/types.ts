@@ -82,14 +82,11 @@ export interface CandidateSignal {
 }
 
 /**
- * How the operator wants to use Arkzen.
- *
- * "lead-gen" — find people publicly saying they want to hire/buy something.
- *   Sources: community threads, forums, social posts with intent signals.
- * "job-search" — find contract/freelance job listings from companies.
- *   Sources: remote job boards (Remotive, RemoteOK, WWR).
+ * ArkZen is a lead-gen tool: find people publicly saying they want to hire
+ * or buy something, then reach out while that want is still live.
+ * Sources: community threads, forums, social posts with buying-intent signals.
  */
-export type WorkspaceMode = "lead-gen" | "job-search";
+export type WorkspaceMode = "lead-gen";
 
 /** What the operator sells — the lens every signal is scored against. */
 export interface ServiceProfile {

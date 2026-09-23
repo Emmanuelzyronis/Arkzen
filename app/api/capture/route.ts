@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   const baseProfile = profileFromIntent(intent.value ?? "");
   const profile: ServiceProfile = {
     ...baseProfile,
-    mode: savedProfile?.mode ?? "job-search",
+    mode: savedProfile?.mode ?? "lead-gen",
   };
   const startedAt = new Date().toISOString();
   const { signals, runs } = await acquireAll({ profile, limitPerSource: 25 });

@@ -94,7 +94,6 @@ export default function OnboardingPage() {
           negativeSignals: draft.negativeSignals,
           locations: draft.locations.split(",").map((l) => l.trim()).filter(Boolean),
           minimumEngagement: draft.minimumEngagement.trim() || undefined,
-          mode: "job-search",
         }),
       });
       if (!res.ok) {
@@ -113,17 +112,17 @@ export default function OnboardingPage() {
     1: {
       label: "About you",
       title: "What kind of work do you do?",
-      subtitle: "Describe your skills and the type of contracts you're looking for.",
+      subtitle: "Tell us what you do — Arkzen will use this to find people who need exactly that.",
     },
     2: {
       label: "Your skills",
       title: "What are your skills?",
-      subtitle: "Pick everything that applies. Each one adds weight to listings that mention it.",
+      subtitle: "Pick everything that applies. Leads that mention these skills will rank higher for you.",
     },
     3: {
       label: "What to skip",
       title: "What will you not take on?",
-      subtitle: "Listings matching these are dropped before they reach your list. Saves you the noise.",
+      subtitle: "Posts matching these are filtered out before they reach you. Keeps the noise down.",
     },
   };
 
@@ -212,7 +211,7 @@ export default function OnboardingPage() {
             </Button>
           ) : (
             <Button variant="accent" size="md" onClick={save} disabled={saving}>
-              {saving ? "Setting up…" : "Start finding work"}
+              {saving ? "Setting up…" : "Start finding leads"}
             </Button>
           )}
         </div>

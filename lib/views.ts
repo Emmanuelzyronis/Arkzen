@@ -94,7 +94,7 @@ export const VIEWS: View[] = [
     path: "/opportunities",
     label: "All opportunities",
     blurb: "Everything found so far, best first.",
-    empty: "Nothing found yet. Run a search and this fills up.",
+    empty: "Nothing here yet. Hit Find leads and your pipeline starts filling up.",
     match: () => true,
   },
   {
