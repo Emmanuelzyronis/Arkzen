@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     negativeSignals?: string[];
     locations?: string[];
     minimumEngagement?: string;
+    mode?: string;
   };
 
   const name = (body.name ?? "").trim();
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "name and description are required" }, { status: 400 });
   }
 
+  const mode = body.mode === "job-search" ? "job-search" : "lead-gen";
+
   const profile = await upsertServiceProfile(session.userId, {
     name,
     description,
@@ -39,6 +42,7 @@ export async function POST(request: Request) {
     negativeSignals: Array.isArray(body.negativeSignals) ? body.negativeSignals.filter(Boolean) : [],
     locations: Array.isArray(body.locations) ? body.locations.filter(Boolean) : [],
     minimumEngagement: body.minimumEngagement?.trim() || undefined,
+    mode,
   });
 
   return NextResponse.json({ profile }, { status: 201 });

@@ -57,7 +57,7 @@ export function PeriodPicker() {
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="inline-flex h-8 items-center justify-between gap-2 rounded-full border border-line bg-surface px-3 text-[13px] font-medium text-fg transition-colors hover:bg-surface-3"
+        className="inline-flex h-7 items-center justify-between gap-2 rounded-md border border-line bg-surface px-2.5 text-[12px] font-medium text-fg transition-colors hover:bg-surface-3"
       >
         {label}
         <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 text-fg-muted" />

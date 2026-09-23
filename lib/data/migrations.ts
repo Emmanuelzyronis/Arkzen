@@ -199,4 +199,5 @@ export async function migrate(driver: SqlDriver): Promise<void> {
     await driver.exec(statement);
   }
   await addColumnIfMissing(driver, "partner_messages", "payload", "text");
+  await addColumnIfMissing(driver, "service_profiles", "mode", "text");
 }

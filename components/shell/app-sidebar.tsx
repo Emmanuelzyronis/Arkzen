@@ -18,15 +18,15 @@ export function AppSidebar({
     <aside
       data-collapsed={collapsed}
       className={cn(
-        "sticky top-3 hidden h-[calc(100dvh-1.5rem)] shrink-0 flex-col overflow-hidden rounded-panel border border-line bg-surface shadow-card transition-[width] duration-200 ease-out lg:flex",
-        collapsed ? "w-[72px]" : "w-[248px]",
+        "hidden h-full shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[width] duration-200 ease-out lg:flex",
+        collapsed ? "w-[64px]" : "w-[232px]",
       )}
     >
-      <div className={cn("flex items-center gap-2.5 px-4 pb-2 pt-4", collapsed && "justify-center px-0")}>
-        <Link href="/" className="flex min-w-0 items-center gap-2.5">
-          <BrandMark />
+      <div className={cn("flex items-center gap-2.5 border-b border-line px-4 py-3", collapsed && "justify-center px-0")}>
+        <Link href="/" className="flex min-w-0 items-center gap-2">
+          <BrandMark className="size-5 text-brand" />
           {!collapsed && (
-            <span className="truncate text-[15px] font-semibold tracking-[-0.02em] text-fg">Arkzen</span>
+            <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-fg">Arkzen</span>
           )}
         </Link>
         {!collapsed && (
@@ -34,7 +34,7 @@ export function AppSidebar({
             type="button"
             onClick={onToggle}
             aria-label="Collapse navigation"
-            className="ml-auto grid size-7 shrink-0 place-items-center rounded-full text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
+            className="ml-auto grid size-7 shrink-0 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
           >
             <ChevronsLeft aria-hidden="true" className="size-4" />
           </button>
@@ -49,15 +49,11 @@ export function AppSidebar({
               type="button"
               onClick={onToggle}
               aria-label="Expand navigation"
-              className="mt-1 grid size-9 w-full place-items-center rounded-full text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
+              className="mt-1 grid size-9 w-full place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
             >
               <ChevronsRight aria-hidden="true" className="size-4" />
             </button>
-          ) : (
-            <p className="px-3 pt-3 text-[11px] leading-relaxed text-fg-muted">
-              Every opportunity keeps the post it came from.
-            </p>
-          )
+          ) : null
         }
       />
     </aside>

@@ -29,15 +29,15 @@ export function AppShell({
   }
 
   return (
-    // The toast host wraps the whole shell so any screen — including the error
-    // boundary — can report the result of an action without its own plumbing.
     <ToastProvider>
-      <div className="flex min-h-dvh gap-3 p-3">
+      <div className="flex h-dvh overflow-hidden bg-canvas">
         <AppSidebar collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
         <MobileNav open={navOpen} onOpenChange={setNavOpen} />
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <WorkspaceTopbar profileName={profileName} onOpenNav={() => setNavOpen(true)} />
-          <main className="min-w-0 flex-1 pb-2">{children}</main>
+          <main className="min-w-0 flex-1 overflow-y-auto">
+            <div className="px-5 py-5 pb-8">{children}</div>
+          </main>
         </div>
       </div>
     </ToastProvider>

@@ -55,6 +55,7 @@ export const remotiveSource: SourceAdapter = {
       requiresCredentials: false,
       live: true,
       notes: "Remotive public API. No auth required.",
+      modes: ["job-search"],
     };
   },
 
@@ -89,9 +90,10 @@ export const remotiveSource: SourceAdapter = {
         }),
       );
 
-      const jobs = results.flat();
+      const contractTypes = new Set(["contract", "freelance", "part_time"]);
+      const jobs = results.flat().filter((job) => contractTypes.has(job.job_type?.toLowerCase() ?? ""));
       if (jobs.length === 0) {
-        return { status: "PROVIDER_ERROR", detail: "Remotive returned no jobs.", signals: [] };
+        return { status: "PROVIDER_ERROR", detail: "Remotive returned no contract/freelance listings.", signals: [] };
       }
 
       const signals: CandidateSignal[] = jobs.slice(0, limit).map((job) => {

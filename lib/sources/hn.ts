@@ -80,6 +80,7 @@ export const hnSource: SourceAdapter = {
       requiresCredentials: false,
       live: true,
       notes: "HN Algolia search — no auth required. Uses the monthly 'Who is hiring?' thread.",
+      modes: ["lead-gen"],
     };
   },
 

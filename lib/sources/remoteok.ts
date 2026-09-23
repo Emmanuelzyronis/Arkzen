@@ -60,6 +60,7 @@ export const remoteokSource: SourceAdapter = {
       requiresCredentials: false,
       live: true,
       notes: "RemoteOK public API. No auth required. Requires browser user-agent.",
+      modes: ["job-search"],
     };
   },
 
@@ -82,7 +83,7 @@ export const remoteokSource: SourceAdapter = {
   async search(_profile: ServiceProfile, limit: number): Promise<SearchResult> {
     const capturedAt = new Date().toISOString();
     // Search two relevant tag combinations and merge
-    const queries = ["dev,saas", "typescript,javascript"];
+    const queries = ["dev,contract", "javascript,contract"];
 
     try {
       const results = await Promise.all(

@@ -4,6 +4,7 @@ import { buildOpportunities } from "@/lib/domain/pipeline";
 import { defaultServiceProfile } from "@/lib/domain/service-profile";
 import type { ServiceProfile } from "@/lib/domain/types";
 import {
+  getServiceProfile,
   insertActivity,
   insertOpportunities,
   recordAcquisitionRun,
@@ -47,7 +48,12 @@ export async function POST(request: Request) {
   const intent = readText(body, "intent", { max: 2000, label: "What to watch for" });
   if (!intent.ok) return intent.response;
 
-  const profile = profileFromIntent(intent.value ?? "");
+  const savedProfile = await getServiceProfile(session.userId);
+  const baseProfile = profileFromIntent(intent.value ?? "");
+  const profile: ServiceProfile = {
+    ...baseProfile,
+    mode: savedProfile?.mode ?? "lead-gen",
+  };
   const startedAt = new Date().toISOString();
   const { signals, runs } = await acquireAll({ profile, limitPerSource: 25 });
   const result = buildOpportunities(signals, profile, new Date());

@@ -41,7 +41,7 @@ export function SignOutButton({ collapsed = false }: { collapsed?: boolean }) {
         void signOut({ redirectUrl: "/sign-in" }).catch(() => setPending(false));
       }}
       className={cn(
-        "group flex h-9 w-full items-center gap-2.5 rounded-full px-3 text-[13px] text-fg-soft transition-colors hover:bg-surface-3 hover:text-fg disabled:pointer-events-none disabled:opacity-45",
+        "group flex h-8 w-full items-center gap-2 rounded-md px-2.5 text-[13px] text-fg-soft transition-colors hover:bg-surface-2 hover:text-fg disabled:pointer-events-none disabled:opacity-45",
         collapsed && "justify-center px-0",
       )}
     >

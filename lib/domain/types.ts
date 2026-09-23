@@ -81,6 +81,16 @@ export interface CandidateSignal {
   meta?: Record<string, string | number | boolean>;
 }
 
+/**
+ * How the operator wants to use Arkzen.
+ *
+ * "lead-gen" — find people publicly saying they want to hire/buy something.
+ *   Sources: community threads, forums, social posts with intent signals.
+ * "job-search" — find contract/freelance job listings from companies.
+ *   Sources: remote job boards (Remotive, RemoteOK, WWR).
+ */
+export type WorkspaceMode = "lead-gen" | "job-search";
+
 /** What the operator sells — the lens every signal is scored against. */
 export interface ServiceProfile {
   id: string;
@@ -92,6 +102,7 @@ export interface ServiceProfile {
   negativeSignals: string[];
   locations: string[];
   minimumEngagement?: string;
+  mode?: WorkspaceMode;
 }
 
 export type CheckStatus = "pass" | "warn" | "unknown";

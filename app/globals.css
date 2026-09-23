@@ -1,149 +1,169 @@
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
 
-/* Class-based dark mode: the toggle writes `.dark` on <html>. */
+/* Class-based dark mode — toggle writes `.dark` on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
-   ArkZen token layer.
+   ArkZen token layer — dark-first intelligence console.
 
-   Two complete themes. Light: near-white cards on a cool-grey canvas. Dark:
-   elevated zinc cards on near-black. Indigo brand accent (intelligence),
-   amber action accent (capture / CTA), green/red delta pair.
+   Violet brand (signal / intelligence), orange action accent (capture / CTA),
+   green/red delta pair. Tight 8px grid, 8px base radius.
    ========================================================================== */
 
 :root {
-  --canvas: #f1f2f4;
-  --surface: #ffffff;
-  --surface-2: #f8f9fa;
-  --surface-3: #f1f2f4;
-  --line: #e4e6ea;
-  --line-strong: #d0d3da;
-  --fg: #0b0c10;
-  --fg-soft: #4b5063;
-  --fg-muted: #868ca0;
-  --brand: #6366f1;
-  --brand-bright: #818cf8;
-  --brand-soft: rgba(99, 102, 241, 0.1);
-  --accent: #f59e0b;
-  --accent-fg: #000000;
-  --up: #16a34a;
-  --up-bg: #e9f9f0;
-  --down: #d93a3f;
-  --down-bg: #fdeceb;
-  --warn: #b45309;
-  --warn-bg: #fef3c7;
-  --hero: #0f1015;
-  --hero-fg: #f7f8fa;
-  --hero-muted: #9295a4;
-  --elevation-card: 0 1px 2px rgba(16, 17, 20, 0.04), 0 12px 32px -20px rgba(16, 17, 20, 0.14);
-  --elevation-panel: 0 1px 2px rgba(16, 17, 20, 0.05), 0 24px 60px -32px rgba(16, 17, 20, 0.22);
-  --glow: radial-gradient(120% 120% at 50% 0%, rgba(99, 102, 241, 0.09), transparent 62%);
+  /* Canvas & surfaces */
+  --canvas:    #F6F5FA;
+  --surface:   #FFFFFF;
+  --surface-2: #F0EFF8;
+  --surface-3: #E8E7F2;
+
+  /* Borders */
+  --line:        #D8D6E8;
+  --line-strong: #C2BFD8;
+
+  /* Foreground */
+  --fg:       #0E0E16;
+  --fg-soft:  #45445A;
+  --fg-muted: #7E7D99;
+
+  /* Brand — violet */
+  --brand:        #7C3AED;
+  --brand-bright: #8B5CF6;
+  --brand-soft:   rgba(124, 58, 237, 0.08);
+
+  /* Action accent — orange */
+  --accent:    #EA580C;
+  --accent-fg: #FFFFFF;
+
+  /* Semantic delta */
+  --up:     #16a34a;
+  --up-bg:  #dcfce7;
+  --down:   #dc2626;
+  --down-bg:#fee2e2;
+  --warn:   #b45309;
+  --warn-bg:#fef3c7;
+
+  /* Hero panel (dark on light = inverted) */
+  --hero:       #0E0E16;
+  --hero-fg:    #EDEEF5;
+  --hero-muted: #9A9AB0;
+
+  --elevation-card:  0 1px 2px rgba(14, 14, 22, 0.04), 0 4px 16px -8px rgba(14, 14, 22, 0.08);
+  --elevation-panel: 0 1px 3px rgba(14, 14, 22, 0.06), 0 8px 32px -12px rgba(14, 14, 22, 0.14);
+  --glow: radial-gradient(120% 100% at 50% 0%, rgba(124, 58, 237, 0.06), transparent 60%);
+
   color-scheme: light;
 }
 
 .dark {
-  --canvas: #08080b;
-  --surface: #111116;
-  --surface-2: #16161c;
-  --surface-3: #1d1d25;
-  --line: #222229;
-  --line-strong: #2e2e38;
-  --fg: #f4f5f9;
-  --fg-soft: #b0b3c4;
-  --fg-muted: #7a7d90;
-  --brand: #818cf8;
-  --brand-bright: #a5b4fc;
-  --brand-soft: rgba(129, 140, 248, 0.14);
-  --accent: #fbbf24;
-  --accent-fg: #000000;
-  --up: #4ade80;
-  --up-bg: rgba(74, 222, 128, 0.14);
-  --down: #f87171;
-  --down-bg: rgba(248, 113, 113, 0.14);
-  --warn: #fbbf24;
-  --warn-bg: rgba(251, 191, 36, 0.14);
-  --hero: #141418;
-  --hero-fg: #f4f5f9;
-  --hero-muted: #8b8ea0;
-  --elevation-card: 0 1px 0 rgba(255, 255, 255, 0.02), 0 14px 34px -24px rgba(0, 0, 0, 0.85);
-  --elevation-panel: 0 1px 0 rgba(255, 255, 255, 0.03), 0 30px 70px -36px rgba(0, 0, 0, 0.92);
-  --glow: radial-gradient(120% 120% at 50% 0%, rgba(129, 140, 248, 0.14), transparent 60%);
+  /* Canvas & surfaces */
+  --canvas:    #0B0B0F;
+  --surface:   #131318;
+  --surface-2: #1A1A22;
+  --surface-3: #222230;
+
+  /* Borders */
+  --line:        #2C2C3C;
+  --line-strong: #3C3C50;
+
+  /* Foreground */
+  --fg:       #EDEEF5;
+  --fg-soft:  #9A9AB0;
+  --fg-muted: #60607A;
+
+  /* Brand — violet (brighter on dark) */
+  --brand:        #A78BFA;
+  --brand-bright: #C4B5FD;
+  --brand-soft:   rgba(167, 139, 250, 0.12);
+
+  /* Action accent — orange (warm on dark) */
+  --accent:    #FB923C;
+  --accent-fg: #0B0B0F;
+
+  /* Semantic delta */
+  --up:     #4ade80;
+  --up-bg:  rgba(74, 222, 128, 0.12);
+  --down:   #f87171;
+  --down-bg:rgba(248, 113, 113, 0.12);
+  --warn:   #fbbf24;
+  --warn-bg:rgba(251, 191, 36, 0.12);
+
+  /* Hero panel */
+  --hero:       #1A1A22;
+  --hero-fg:    #EDEEF5;
+  --hero-muted: #9A9AB0;
+
+  --elevation-card:  0 1px 0 rgba(255,255,255,0.02), 0 8px 24px -12px rgba(0,0,0,0.8);
+  --elevation-panel: 0 1px 0 rgba(255,255,255,0.03), 0 16px 48px -20px rgba(0,0,0,0.9);
+  --glow: radial-gradient(120% 100% at 50% 0%, rgba(167, 139, 250, 0.10), transparent 60%);
+
   color-scheme: dark;
 }
 
 @theme inline {
-  --color-canvas: var(--canvas);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-surface-3: var(--surface-3);
-  --color-line: var(--line);
+  --color-canvas:      var(--canvas);
+  --color-surface:     var(--surface);
+  --color-surface-2:   var(--surface-2);
+  --color-surface-3:   var(--surface-3);
+  --color-line:        var(--line);
   --color-line-strong: var(--line-strong);
-  --color-fg: var(--fg);
-  --color-fg-soft: var(--fg-soft);
-  --color-fg-muted: var(--fg-muted);
-  --color-brand: var(--brand);
-  --color-brand-bright: var(--brand-bright);
-  --color-brand-soft: var(--brand-soft);
-  --color-accent: var(--accent);
-  --color-accent-fg: var(--accent-fg);
-  --color-up: var(--up);
-  --color-up-bg: var(--up-bg);
-  --color-down: var(--down);
-  --color-down-bg: var(--down-bg);
-  --color-warn: var(--warn);
-  --color-warn-bg: var(--warn-bg);
-  --color-hero: var(--hero);
-  --color-hero-fg: var(--hero-fg);
-  --color-hero-muted: var(--hero-muted);
+  --color-fg:          var(--fg);
+  --color-fg-soft:     var(--fg-soft);
+  --color-fg-muted:    var(--fg-muted);
+  --color-brand:       var(--brand);
+  --color-brand-bright:var(--brand-bright);
+  --color-brand-soft:  var(--brand-soft);
+  --color-accent:      var(--accent);
+  --color-accent-fg:   var(--accent-fg);
+  --color-up:          var(--up);
+  --color-up-bg:       var(--up-bg);
+  --color-down:        var(--down);
+  --color-down-bg:     var(--down-bg);
+  --color-warn:        var(--warn);
+  --color-warn-bg:     var(--warn-bg);
+  --color-hero:        var(--hero);
+  --color-hero-fg:     var(--hero-fg);
+  --color-hero-muted:  var(--hero-muted);
 
-  --radius-tile: 10px;
-  --radius-card: 16px;
-  --radius-panel: 20px;
+  /* Tighter radius scale — 8px base */
+  --radius-sm:    4px;
+  --radius-tile:  6px;
+  --radius-card:  8px;
+  --radius-panel: 10px;
 
-  --shadow-card: var(--elevation-card);
+  --shadow-card:  var(--elevation-card);
   --shadow-panel: var(--elevation-panel);
 
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Geist installed as npm package — no external font request */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --animate-rise: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-fade: fade 0.25s ease both;
+  --animate-rise: rise 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.2s ease both;
 }
 
 @keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
 }
 
 @keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @layer base {
-  * {
-    border-color: var(--line);
-  }
+  * { border-color: var(--line); }
 
-  html,
-  body {
+  html, body {
     background: var(--canvas);
     color: var(--fg);
   }
 
   body {
     font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -151,7 +171,7 @@
   :focus-visible {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
   }
 
   ::selection {
@@ -161,9 +181,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

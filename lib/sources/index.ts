@@ -1,13 +1,11 @@
 import type { CandidateSignal, ServiceProfile } from "@/lib/domain/types";
-import { corpusSource } from "./corpus-source";
 import { hnSource } from "./hn";
-import { redditSource } from "./reddit";
 import { remoteokSource } from "./remoteok";
 import { remotiveSource } from "./remotive";
 import { wwrSource } from "./wwr";
 import type { RunStatus, SourceAdapter, SourceHealth } from "./types";
 
-export const sources: SourceAdapter[] = [redditSource, hnSource, remotiveSource, remoteokSource, wwrSource, corpusSource];
+export const sources: SourceAdapter[] = [hnSource, remotiveSource, remoteokSource, wwrSource];
 
 export function getSource(id: string): SourceAdapter | undefined {
   return sources.find((source) => source.id === id);
@@ -32,6 +30,10 @@ export interface AcquisitionResult {
  * Fans out over every registered source. One source failing never hides
  * another source's results, and an empty run is always distinguishable from a
  * blocked one because the run status is carried all the way to the UI.
+ *
+ * Sources are filtered by the profile's `mode` field: each source declares
+ * which modes it applies to via `capabilities().modes`. A source with no
+ * declared modes runs in every mode.
  */
 export async function acquireAll(options?: {
   profile: ServiceProfile;
@@ -44,8 +46,15 @@ export async function acquireAll(options?: {
   const signals: CandidateSignal[] = [];
   const runs: SourceRun[] = [];
 
+  const mode = profile.mode ?? "lead-gen";
+  const activeSources = sources.filter((source) => {
+    const caps = source.capabilities();
+    if (!caps.modes || caps.modes.length === 0) return true;
+    return caps.modes.includes(mode);
+  });
+
   const settled = await Promise.all(
-    sources.map(async (source) => {
+    activeSources.map(async (source) => {
       const started = now();
       try {
         const result = await source.search(profile, limit);
@@ -84,5 +93,5 @@ export async function healthCheckAll(): Promise<SourceHealth[]> {
   return Promise.all(sources.map((source) => source.health()));
 }
 
-export { corpusSource, hnSource, redditSource, remoteokSource, remotiveSource, wwrSource };
+export { hnSource, remoteokSource, remotiveSource, wwrSource };
 export type { SourceAdapter, RunStatus, SourceHealth };

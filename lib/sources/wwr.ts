@@ -2,8 +2,7 @@ import type { CandidateSignal, ServiceProfile } from "@/lib/domain/types";
 import type { SearchResult, SourceAdapter, SourceCapabilities, SourceHealth } from "./types";
 
 const RSS_URLS = [
-  "https://weworkremotely.com/categories/remote-programming-jobs.rss",
-  "https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss",
+  "https://weworkremotely.com/categories/remote-contract-jobs.rss",
 ];
 const TIMEOUT_MS = 8000;
 
@@ -86,6 +85,7 @@ export const wwrSource: SourceAdapter = {
       requiresCredentials: false,
       live: true,
       notes: "We Work Remotely RSS feeds. No auth required.",
+      modes: ["job-search"],
     };
   },
 

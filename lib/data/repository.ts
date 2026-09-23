@@ -2,8 +2,6 @@ import { randomUUID } from "node:crypto";
 import { buildOpportunities, fingerprintSignal, type RejectedSignal } from "@/lib/domain/pipeline";
 import type { RunStatus } from "@/lib/sources/types";
 import { acquireAll } from "@/lib/sources";
-import { corpusSource } from "@/lib/sources/corpus-source";
-import { defaultServiceProfile } from "@/lib/domain/service-profile";
 import type {
   Activity,
   PartnerResponse,
@@ -62,8 +60,7 @@ export async function ensureReady(ownerId: string): Promise<void> {
         "select count(*) as count from opportunities where owner_id = ?",
         [ownerId],
       );
-      const count = Number(rows[0]?.count ?? 0);
-      if (count === 0) await seedFromCorpus(driver, ownerId);
+      // No auto-seeding — workspace starts empty, operator populates via search.
     })().catch((error) => {
       readyByOwner.delete(ownerId);
       throw error;
@@ -77,118 +74,6 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-/** Initial review states for the seeded corpus so the feed reflects real work. */
-const SEED_STATUS: Array<{ match: string; status: OpportunityStatus; outcome?: OutcomeKind }> = [
-  { match: "corpus:multitenant-rails-004", status: "ACTIVE" },
-  { match: "corpus:nextjs-marketing-site-005", status: "WON", outcome: "WON" },
-  { match: "corpus:nonprofit-grant-report-009", status: "LOST", outcome: "LOST" },
-  { match: "corpus:noise-selfpromo-013", status: "REVIEWING" },
-];
-
-async function seedFromCorpus(driver: SqlDriver, ownerId: string): Promise<void> {
-  const startedAt = nowIso();
-  const { signals, runs } = await acquireCorpus(defaultServiceProfile);
-  const result = buildOpportunities(signals, defaultServiceProfile);
-  const inserted = await insertOpportunities(ownerId, result.opportunities, driver);
-
-  const seededActivities: Array<Omit<Activity, "id" | "createdAt" | "opportunityId">> = [];
-  for (const opportunity of result.opportunities) {
-    const seed = SEED_STATUS.find((entry) => entry.match === opportunity.signal.sourceObjectId);
-    if (seed && seed.status !== "NEW") {
-      seededActivities.push({
-        kind: "STATUS_CHANGE",
-        actor: "operator",
-        summary: `Reviewed and moved to ${seed.status}`,
-        detail:
-          seed.status === "WON"
-            ? "Signed after a two-week scoping call. Kept for reference on pricing and delivery shape."
-            : seed.status === "LOST"
-              ? "Budget did not stretch to a paid first version. Logged so the pattern is visible."
-              : "Operator is working this opportunity now.",
-        statusFrom: "NEW",
-        statusTo: seed.status,
-      });
-    }
-  }
-
-  for (const activity of seededActivities) {
-    const opportunity = result.opportunities.find((entry) =>
-      activity.statusTo === "WON" ? entry.signal.sourceObjectId === "corpus:nextjs-marketing-site-005"
-      : activity.statusTo === "LOST" ? entry.signal.sourceObjectId === "corpus:nonprofit-grant-report-009"
-      : entry.signal.sourceObjectId === "corpus:multitenant-rails-004",
-    );
-    if (!opportunity) continue;
-    await insertActivity(
-      ownerId,
-      {
-        opportunityId: opportunity.id,
-        kind: activity.kind,
-        actor: activity.actor,
-        summary: activity.summary,
-        detail: activity.detail ?? null,
-        statusFrom: activity.statusFrom ?? null,
-        statusTo: activity.statusTo ?? null,
-      },
-      driver,
-    );
-  }
-
-  await recordSourceHealth(
-    ownerId,
-    runs.map((run) => ({
-      providerId: run.sourceId,
-      available: run.status === "SUCCESS" || run.status === "PARTIAL_SUCCESS",
-      detail: run.detail,
-      checkedAt: new Date().toISOString(),
-    })),
-    driver,
-  );
-
-  await recordAcquisitionRun(
-    ownerId,
-    {
-      startedAt,
-      completedAt: nowIso(),
-      status: runs.every((run) => run.status === "SUCCESS") ? "SUCCESS" : "PARTIAL_SUCCESS",
-      detail: "Initial capture run: corpus replayed through the full pipeline.",
-      observed: result.observed,
-      kept: result.opportunities.length,
-      rejected: result.rejected.length,
-      duplicates: result.duplicates,
-      created: inserted.length,
-      sourceRuns: runs.map((run) => ({
-        sourceId: run.sourceId,
-        sourceName: run.sourceName,
-        status: run.status,
-        detail: run.detail,
-        count: run.count,
-      })),
-    },
-    driver,
-  );
-}
-
-/**
- * Seeding replays the reviewed corpus only: it is deterministic, instant, and
- * makes no third-party request. Live sources are queried on demand from the
- * Capture screen, where a slow or blocked provider is visible to the operator.
- */
-async function acquireCorpus(profile: ServiceProfile) {
-  const result = await corpusSource.search(profile, 100);
-  return {
-    signals: result.signals,
-    runs: [
-      {
-        sourceId: corpusSource.id,
-        sourceName: corpusSource.name,
-        status: result.status,
-        detail: result.detail,
-        count: result.signals.length,
-        durationMs: 0,
-      },
-    ],
-  };
-}
 
 /**
  * Writes the opportunities that are not already stored, and returns exactly
@@ -213,9 +98,6 @@ export async function insertOpportunities(
   opportunities: ScoredOpportunity[],
   driverOverride?: SqlDriver,
 ): Promise<ScoredOpportunity[]> {
-  // Only on the public path. `seedFromCorpus` passes the driver it was handed
-  // from inside `ensureReady()`, so awaiting `ensureReady()` there would wait on
-  // the very promise that is running — a deadlock, not a no-op.
   if (!driverOverride) await ensureReady(ownerId);
 
   const driver = driverOverride ?? (await getDriver());
@@ -228,7 +110,6 @@ export async function insertOpportunities(
     seen.add(fingerprint);
 
     const timestamp = nowIso();
-    const seed = SEED_STATUS.find((entry) => entry.match === opportunity.signal.sourceObjectId);
     // `query`, not `run`: the empty result on conflict is how we learn the row
     // was already there. `run` returns nothing and could not tell us.
     const rows = await driver.query<{ id: string }>(
@@ -259,8 +140,8 @@ export async function insertOpportunities(
         opportunity.intentSummary,
         opportunity.score,
         opportunity.band,
-        seed?.status ?? "NEW",
-        seed?.outcome ?? null,
+        "NEW",
+        null,
         null,
         JSON.stringify(opportunity),
         fingerprint,
@@ -951,6 +832,7 @@ function profileFromRow(row: {
   negative_signals: string;
   locations: string;
   minimum_engagement: string | null;
+  mode?: string | null;
 }): ServiceProfile {
   return {
     id: row.id,
@@ -961,6 +843,7 @@ function profileFromRow(row: {
     negativeSignals: JSON.parse(row.negative_signals) as string[],
     locations: JSON.parse(row.locations) as string[],
     minimumEngagement: row.minimum_engagement ?? undefined,
+    mode: (row.mode as ServiceProfile["mode"]) ?? undefined,
   };
 }
 
@@ -976,8 +859,9 @@ export async function getServiceProfile(ownerId: string): Promise<ServiceProfile
     negative_signals: string;
     locations: string;
     minimum_engagement: string | null;
+    mode: string | null;
   }>(
-    `select id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement
+    `select id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement, mode
      from service_profiles where owner_id = ?`,
     [ownerId],
   );
@@ -994,6 +878,7 @@ export async function upsertServiceProfile(
     negativeSignals: string[];
     locations: string[];
     minimumEngagement?: string;
+    mode?: ServiceProfile["mode"];
   },
 ): Promise<ServiceProfile> {
   await ensureMigrated();
@@ -1003,8 +888,8 @@ export async function upsertServiceProfile(
   const now = nowIso();
 
   await driver.run(
-    `insert into service_profiles (id, owner_id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement, created_at, updated_at)
-     values (?,?,?,?,?,?,?,?,?,?,?)
+    `insert into service_profiles (id, owner_id, name, description, capabilities, keywords, negative_signals, locations, minimum_engagement, mode, created_at, updated_at)
+     values (?,?,?,?,?,?,?,?,?,?,?,?)
      on conflict (owner_id) do update set
        name = excluded.name,
        description = excluded.description,
@@ -1013,6 +898,7 @@ export async function upsertServiceProfile(
        negative_signals = excluded.negative_signals,
        locations = excluded.locations,
        minimum_engagement = excluded.minimum_engagement,
+       mode = excluded.mode,
        updated_at = excluded.updated_at`,
     [
       id,
@@ -1024,6 +910,7 @@ export async function upsertServiceProfile(
       JSON.stringify(data.negativeSignals),
       JSON.stringify(data.locations),
       data.minimumEngagement ?? null,
+      data.mode ?? null,
       now,
       now,
     ],
@@ -1038,5 +925,6 @@ export async function upsertServiceProfile(
     negativeSignals: data.negativeSignals,
     locations: data.locations,
     minimumEngagement: data.minimumEngagement,
+    mode: data.mode,
   };
 }

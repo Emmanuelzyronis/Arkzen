@@ -29,24 +29,24 @@ export function MobileNav({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 animate-fade bg-black/45 lg:hidden" />
-        <DialogPrimitive.Content className="fixed inset-y-3 left-3 z-50 flex w-[272px] max-w-[calc(100vw-1.5rem)] animate-fade flex-col overflow-hidden rounded-panel border border-line bg-surface shadow-panel lg:hidden">
+        <DialogPrimitive.Content className="fixed inset-y-0 left-0 z-50 flex w-[248px] max-w-[calc(100vw-3rem)] animate-fade flex-col overflow-hidden border-r border-line bg-surface lg:hidden">
           <DialogPrimitive.Title className="sr-only">Navigation</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
             Jump to any part of Arkzen.
           </DialogPrimitive.Description>
 
-          <div className="flex items-center gap-2.5 px-4 pb-2 pt-4">
+          <div className="flex items-center gap-2 border-b border-line px-4 py-3">
             <Link
               href="/"
               onClick={() => onOpenChange(false)}
-              className="flex min-w-0 items-center gap-2.5"
+              className="flex min-w-0 items-center gap-2"
             >
-              <BrandMark />
-              <span className="truncate text-[15px] font-semibold tracking-[-0.02em] text-fg">Arkzen</span>
+              <BrandMark className="size-5 text-brand" />
+              <span className="truncate text-[14px] font-semibold tracking-[-0.02em] text-fg">Arkzen</span>
             </Link>
             <DialogPrimitive.Close
               aria-label="Close navigation"
-              className="ml-auto grid size-7 shrink-0 place-items-center rounded-full text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
+              className="ml-auto grid size-7 shrink-0 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-3 hover:text-fg"
             >
               <X aria-hidden="true" className="size-4" />
             </DialogPrimitive.Close>

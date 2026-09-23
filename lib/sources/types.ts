@@ -23,6 +23,12 @@ export interface SourceCapabilities {
   requiresCredentials: boolean;
   live: boolean;
   notes: string;
+  /**
+   * Which workspace modes this source applies to. If absent the source runs
+   * in every mode. "lead-gen" = people publicly asking for help; "job-search"
+   * = companies posting contract/freelance listings.
+   */
+  modes?: Array<"lead-gen" | "job-search">;
 }
 
 export interface SearchResult {

@@ -1,36 +1,15 @@
-import { cn } from "@/lib/utils";
-
-/**
- * ArkZen mark: a rounded tile with a geometric signal/target shape.
- * Flat, single-colour, legible at 28px.
- */
+/* Signal-bars mark — three ascending bars, thematic for "capture signal". */
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <span
+    <svg
+      viewBox="0 0 20 20"
+      className={className ?? "size-[18px]"}
+      fill="none"
       aria-hidden="true"
-      className={cn(
-        "grid size-8 shrink-0 place-items-center rounded-[10px] bg-brand text-white",
-        className,
-      )}
     >
-      <svg viewBox="0 0 20 20" className="size-[18px]" fill="none" aria-hidden="true">
-        {/* Outer arc — top half only, signal/radar motif */}
-        <path
-          d="M4 10 A6 6 0 0 1 16 10"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        {/* Inner arc */}
-        <path
-          d="M6.5 10 A3.5 3.5 0 0 1 13.5 10"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
-        {/* Centre dot */}
-        <circle cx="10" cy="10" r="1.6" fill="currentColor" />
-      </svg>
-    </span>
+      <rect x="2"  y="12" width="3.5" height="6" rx="1" fill="currentColor" opacity="0.45" />
+      <rect x="8.25" y="7"  width="3.5" height="11" rx="1" fill="currentColor" opacity="0.72" />
+      <rect x="14.5" y="2"  width="3.5" height="16" rx="1" fill="currentColor" />
+    </svg>
   );
 }

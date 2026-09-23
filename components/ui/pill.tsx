@@ -7,7 +7,7 @@ type PillTone = "neutral" | "brand" | "accent" | "up" | "down" | "outline";
 const TONE: Record<PillTone, string> = {
   neutral: "bg-surface-3 text-fg-soft",
   brand: "bg-brand-soft text-brand",
-  accent: "bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300",
+  accent: "bg-accent/10 text-accent",
   up: "bg-up-bg text-up",
   down: "bg-down-bg text-down",
   outline: "border border-line text-fg-soft",
