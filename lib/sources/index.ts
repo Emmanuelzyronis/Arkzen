@@ -2,10 +2,10 @@ import type { CandidateSignal, ServiceProfile } from "@/lib/domain/types";
 import { hnSource } from "./hn";
 import { remoteokSource } from "./remoteok";
 import { remotiveSource } from "./remotive";
-import { wwrSource } from "./wwr";
 import type { RunStatus, SourceAdapter, SourceHealth } from "./types";
 
-export const sources: SourceAdapter[] = [hnSource, remotiveSource, remoteokSource, wwrSource];
+// We Work Remotely removed: Cloudflare blocks server-side requests (403).
+export const sources: SourceAdapter[] = [hnSource, remotiveSource, remoteokSource];
 
 export function getSource(id: string): SourceAdapter | undefined {
   return sources.find((source) => source.id === id);
@@ -93,5 +93,5 @@ export async function healthCheckAll(): Promise<SourceHealth[]> {
   return Promise.all(sources.map((source) => source.health()));
 }
 
-export { hnSource, remoteokSource, remotiveSource, wwrSource };
+export { hnSource, remoteokSource, remotiveSource };
 export type { SourceAdapter, RunStatus, SourceHealth };

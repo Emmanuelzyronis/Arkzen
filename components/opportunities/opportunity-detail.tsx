@@ -1,6 +1,5 @@
-import { ArrowUpRight, CircleHelp } from "lucide-react";
+import { ArrowUpRight, CircleHelp, ExternalLink } from "lucide-react";
 
-import { PartnerPanel } from "@/components/opportunities/partner-panel";
 import { RecordOutcome } from "@/components/opportunities/record-outcome";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Meter } from "@/components/ui/data-table";
@@ -133,66 +132,37 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
             </CardBody>
           </Card>
 
-          <Card>
-            <CardHeader
-              title="What we'd say"
-              subtitle={`Drafted on ${scoredAt} from the post above. Read it before you send it — nobody has spoken to them yet.`}
-            />
-            <CardBody className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Angle label="Start with" body={opportunity.strategy.leadWith} />
-                <Angle label="Leave out" body={opportunity.strategy.avoid} />
-              </div>
-
-              <div>
-                <p className="text-[11px] font-medium text-fg-muted">The approach</p>
-                <p className="mt-1 text-[13px] leading-relaxed text-fg-soft">
-                  {opportunity.strategy.approach}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[11px] font-medium text-fg-muted">Opening message</p>
-                <p className="mt-1 whitespace-pre-wrap rounded-tile bg-surface-2 px-3 py-2.5 text-[13px] leading-relaxed text-fg">
-                  {opportunity.strategy.suggestedMessage}
-                </p>
-              </div>
-
-              {opportunity.strategy.followUpPlan.length > 0 ? (
-                <div>
-                  <p className="text-[11px] font-medium text-fg-muted">If they don&apos;t answer</p>
-                  <ol className="mt-1.5 space-y-1.5">
-                    {opportunity.strategy.followUpPlan.map((step, index) => (
-                      <li key={step} className="flex gap-2.5 text-[12px] leading-relaxed text-fg-soft">
-                        <span
-                          aria-hidden="true"
-                          className="mt-px grid size-4 shrink-0 place-items-center rounded-full bg-surface-3 text-[10px] font-medium text-fg-muted"
-                        >
-                          {index + 1}
-                        </span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ) : null}
-
-              {opportunity.strategy.evidenceUsed.length > 0 ? (
-                <div className="border-t border-line pt-3">
-                  <p className="text-[11px] font-medium text-fg-muted">Taken from</p>
-                  <ul className="mt-1.5 space-y-1">
-                    {opportunity.strategy.evidenceUsed.map((line) => (
-                      <li key={line} className="text-[12px] leading-relaxed text-fg-muted">
-                        {line}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </CardBody>
-          </Card>
-
-          <PartnerPanel opportunityId={opportunity.id} thread={opportunity.partnerThread} />
+          {signal.canonicalUrl ? (
+            <Card>
+              <CardHeader
+                title="Apply"
+                subtitle="Open the original listing to apply directly with the company."
+              />
+              <CardBody>
+                <a
+                  href={signal.canonicalUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent/90"
+                >
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
+                  Apply on {signal.sourceName}
+                </a>
+                {opportunity.strategy.evidenceUsed.length > 0 ? (
+                  <div className="mt-3 border-t border-line pt-3">
+                    <p className="text-[11px] font-medium text-fg-muted">Skills they mention</p>
+                    <ul className="mt-1.5 space-y-1">
+                      {opportunity.strategy.evidenceUsed.map((line) => (
+                        <li key={line} className="text-[12px] leading-relaxed text-fg-muted">
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </CardBody>
+            </Card>
+          ) : null}
 
           <RecordOutcome
             opportunityId={opportunity.id}

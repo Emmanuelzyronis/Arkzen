@@ -82,8 +82,9 @@ export const remoteokSource: SourceAdapter = {
 
   async search(_profile: ServiceProfile, limit: number): Promise<SearchResult> {
     const capturedAt = new Date().toISOString();
-    // Search two relevant tag combinations and merge
-    const queries = ["dev,contract", "javascript,contract"];
+    // RemoteOK uses technology tags — "contract" as a tag is nearly empty.
+    // Search broad tech categories and let the scoring pipeline rank relevance.
+    const queries = ["dev", "javascript,typescript", "react,nextjs"];
 
     try {
       const results = await Promise.all(
