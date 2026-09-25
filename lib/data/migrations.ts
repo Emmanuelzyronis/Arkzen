@@ -138,6 +138,22 @@ export const MIGRATIONS: string[] = [
      created_at text not null,
      updated_at text not null
    )`,
+  // Signals the pipeline filtered out before scoring. Stored so operators can
+  // review what was blocked and spot false positives. Deduplicated per owner by
+  // fingerprint so multiple capture runs don't create duplicate rows.
+  `create table if not exists rejected_signals (
+     fingerprint text not null,
+     owner_id text not null,
+     source_object_id text not null,
+     source_name text not null,
+     title text not null,
+     published_at text not null,
+     captured_at text not null,
+     rule text not null,
+     reason text not null,
+     primary key (owner_id, fingerprint)
+   )`,
+  `create index if not exists rejected_signals_owner_idx on rejected_signals(owner_id, captured_at)`,
 ];
 
 async function columnExists(driver: SqlDriver, table: string, column: string): Promise<boolean> {

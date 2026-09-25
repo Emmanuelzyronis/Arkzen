@@ -959,3 +959,82 @@ export async function upsertServiceProfile(
     mode: data.mode,
   };
 }
+
+export interface RejectedSignalRow {
+  fingerprint: string;
+  sourceName: string;
+  title: string;
+  publishedAt: string;
+  capturedAt: string;
+  rule: string;
+  reason: string;
+}
+
+export async function insertRejectedSignals(
+  ownerId: string,
+  rejected: Array<{ signal: import("@/lib/domain/types").CandidateSignal; rule: string; reason: string }>,
+): Promise<void> {
+  if (rejected.length === 0) return;
+  await ensureMigrated();
+  const driver = await getDriver();
+  const capturedAt = nowIso();
+  for (const entry of rejected) {
+    const fp = fingerprintSignal(entry.signal);
+    await driver.run(
+      `insert into rejected_signals (fingerprint, owner_id, source_object_id, source_name, title, published_at, captured_at, rule, reason)
+       values (?,?,?,?,?,?,?,?,?)
+       on conflict (owner_id, fingerprint) do nothing`,
+      [
+        fp,
+        ownerId,
+        entry.signal.sourceObjectId,
+        entry.signal.sourceName,
+        entry.signal.title,
+        entry.signal.publishedAt,
+        capturedAt,
+        entry.rule,
+        entry.reason,
+      ],
+    );
+  }
+}
+
+export async function listRejectedSignals(ownerId: string, limit = 100): Promise<RejectedSignalRow[]> {
+  await ensureMigrated();
+  const driver = await getDriver();
+  const rows = await driver.query<{
+    fingerprint: string;
+    source_name: string;
+    title: string;
+    published_at: string;
+    captured_at: string;
+    rule: string;
+    reason: string;
+  }>(
+    `select fingerprint, source_name, title, published_at, captured_at, rule, reason
+     from rejected_signals
+     where owner_id = ?
+     order by captured_at desc
+     limit ?`,
+    [ownerId, limit],
+  );
+  return rows.map((row) => ({
+    fingerprint: row.fingerprint,
+    sourceName: row.source_name,
+    title: row.title,
+    publishedAt: row.published_at,
+    capturedAt: row.captured_at,
+    rule: row.rule,
+    reason: row.reason,
+  }));
+}
+
+export async function listAllOwnerIds(): Promise<string[]> {
+  await ensureMigrated();
+  const driver = await getDriver();
+  const rows = await driver.query<{ owner_id: string }>(
+    `select distinct owner_id from service_profiles`,
+    [],
+  );
+  return rows.map((row) => row.owner_id);
+}

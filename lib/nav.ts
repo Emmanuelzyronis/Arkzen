@@ -1,5 +1,6 @@
 import {
   CheckCircle2,
+  Filter,
   FolderOpen,
   Globe,
   LayoutDashboard,
@@ -64,6 +65,12 @@ export const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         label: "Done",
         icon: CheckCircle2,
         subtitle: "Closed out, with the outcome recorded.",
+      },
+      {
+        href: "/opportunities/rejected",
+        label: "Filtered out",
+        icon: Filter,
+        subtitle: "Signals the pipeline blocked — review for false positives.",
       },
     ],
   },

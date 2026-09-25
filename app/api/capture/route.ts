@@ -7,6 +7,7 @@ import {
   getServiceProfile,
   insertActivity,
   insertOpportunities,
+  insertRejectedSignals,
   recordAcquisitionRun,
   recordSourceHealth,
 } from "@/lib/data/repository";
@@ -34,6 +35,7 @@ export async function POST(_request: Request) {
   // found by someone else's run, and the response named the wrong records.
   const inserted = await insertOpportunities(session.userId, result.opportunities);
   const created = inserted.length;
+  await insertRejectedSignals(session.userId, result.rejected);
 
   for (const opportunity of inserted) {
     if (opportunity.signal.dataKind === "live") {
