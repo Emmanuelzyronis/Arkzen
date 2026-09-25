@@ -53,9 +53,12 @@ async function findCurrentHiringThreadId(): Promise<string | null> {
   return thread?.objectID ?? null;
 }
 
-// Intentionally generic — HN job postings don't use the same vocabulary as
-// service profiles. Pull everything technical and let scoring filter it.
-function buildCapabilityQuery(_profile: ServiceProfile): string {
+// Build a targeted query from the profile's actual keywords so results match
+// the service profile capabilities rather than generic engineering posts.
+function buildCapabilityQuery(profile: ServiceProfile): string {
+  if (profile.keywords && profile.keywords.length > 0) {
+    return profile.keywords.slice(0, 8).join(" ");
+  }
   return "engineer developer remote";
 }
 
@@ -129,7 +132,7 @@ export const hnSource: SourceAdapter = {
 
       const query = buildCapabilityQuery(profile);
       const res = await fetch(
-        `${ALGOLIA_BASE}/search_by_date?query=${encodeURIComponent(query)}&tags=comment,story_${threadId}&hitsPerPage=${Math.min(limit * 2, 50)}`,
+        `${ALGOLIA_BASE}/search_by_date?query=${encodeURIComponent(query)}&tags=comment,story_${threadId}&hitsPerPage=${Math.min(limit * 4, 100)}`,
         { signal: AbortSignal.timeout(TIMEOUT_MS) },
       );
 

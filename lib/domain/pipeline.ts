@@ -29,7 +29,7 @@ export interface PipelineResult {
 const SUPPLY_SIDE_PATTERNS: Array<{ rule: string; test: RegExp; reason: string }> = [
   {
     rule: "supply-side post",
-    test: /\[?\s*for hire\s*\]?|available for (work|hire)|i(?:'m| am) a (?:senior |full[- ]stack |freelance )?(?:developer|designer|engineer)/i,
+    test: /\[\s*for hire\s*\]|available for (work|hire)|i(?:'m| am) a (?:senior |full[- ]stack |freelance )?(?:developer|designer|engineer)/i,
     reason: "This is someone selling their own services, not buying.",
   },
   {

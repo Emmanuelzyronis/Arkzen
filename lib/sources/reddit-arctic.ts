@@ -5,21 +5,45 @@ const ARCTIC_BASE = "https://arctic-shift.photon-reddit.com/api/posts/search";
 const TIMEOUT_MS = 15_000;
 
 /**
- * Subreddits that surface "I need X built, budget $Y" posts.
- * Kept tight — broader communities (webdev, Python) have lower signal density
- * for outreach leads and would drown the pipeline in noise.
+ * Subreddits that surface "I need X built, budget $Y" or similar demand-side
+ * posts. The mix covers dedicated hiring communities plus founder communities
+ * where people post about needing technical help.
  */
-const LEAD_SUBREDDITS = ["forhire", "freelance_forhire", "entrepreneur", "startups"] as const;
+const LEAD_SUBREDDITS = [
+  "forhire",       // [Hiring] flair = demand side; pipeline supply filter catches [For Hire]
+  "hireadev",      // explicit demand-side dev hiring community
+  "SaaS",          // founders who need tech built
+  "entrepreneur",  // business owners looking for help
+] as const;
 
 /**
- * Phrases that reliably indicate a post is from someone looking to hire,
- * not someone looking for work or asking a general question.
+ * Phrases that indicate demand-side intent. Broad enough to capture founders
+ * asking for help mid-post. The pipeline supply-side filter and word-count
+ * check do the real quality gating afterwards.
  */
 const HIRE_SIGNALS = [
-  "looking for", "need a", "need an", "need someone", "seeking",
-  "want to hire", "hiring", "for hire", "budget", "pay", "paid", "hourly",
-  "contract", "freelancer", "contractor", "build", "develop", "fix",
+  "looking for",
+  "need a",
+  "need an",
+  "need someone",
+  "need help",
+  "seeking",
+  "want to hire",
+  "hiring",
+  "for hire",
+  "budget",
+  "hourly",
+  "per hour",
+  "contract",
+  "freelancer",
+  "contractor",
+  "build",
+  "develop",
 ];
+
+/** How far back each run looks for new posts. 48 h gives a buffer so a
+ *  missed run doesn't create a gap; dedup prevents re-inserting seen posts. */
+const LOOKBACK_SECONDS = 48 * 60 * 60;
 
 interface ArcticPost {
   id: string;
@@ -31,6 +55,7 @@ interface ArcticPost {
   score?: number;
   num_comments?: number;
   url?: string;
+  link_flair_text?: string;
 }
 
 interface ArcticResponse {
@@ -54,11 +79,12 @@ function hasProfileMatch(text: string, profile: ServiceProfile): boolean {
   return terms.some((t) => lower.includes(t.toLowerCase()));
 }
 
-async function fetchSubreddit(subreddit: string, limit: number): Promise<ArcticPost[]> {
+async function fetchSubreddit(subreddit: string, limit: number, afterTs: number): Promise<ArcticPost[]> {
   const url = new URL(ARCTIC_BASE);
   url.searchParams.set("subreddit", subreddit);
   url.searchParams.set("sort", "desc");
-  url.searchParams.set("limit", String(Math.min(limit * 3, 100)));
+  url.searchParams.set("limit", String(Math.min(limit * 4, 100)));
+  url.searchParams.set("after", String(afterTs));
 
   const res = await fetch(url.toString(), {
     headers: { "User-Agent": "ArkZen/1.0 lead-gen pipeline" },
@@ -108,9 +134,10 @@ function toSignal(post: ArcticPost, subreddit: string, capturedAt: string): Cand
  * (arctic-shift.photon-reddit.com) solved this: it's a community-maintained
  * archiver that caches Reddit at scale and exposes a clean search API.
  *
- * Focused on subreddits where people explicitly post "I need X built, budget $Y"
- * — forhire, freelance_forhire, entrepreneur, startups. Each one is a confirmed
- * source of actionable outreach leads, not general discussion.
+ * Each run fetches only posts from the last 48 hours using the `after`
+ * timestamp parameter. The 48-hour sliding window means a run that misses a
+ * day still catches everything from that window, while the DB-layer fingerprint
+ * dedup prevents re-inserting posts already seen in a prior run.
  */
 export const redditArcticSource: SourceAdapter = {
   id: "arctic-reddit",
@@ -121,7 +148,7 @@ export const redditArcticSource: SourceAdapter = {
     return {
       requiresCredentials: false,
       live: true,
-      notes: "Arctic Shift open archiver — no auth required. Covers forhire, freelance_forhire, entrepreneur, startups.",
+      notes: "Arctic Shift open archiver — no auth required. Covers forhire, hireadev, SaaS, entrepreneur.",
       modes: ["lead-gen"],
     };
   },
@@ -130,7 +157,7 @@ export const redditArcticSource: SourceAdapter = {
     const checkedAt = new Date().toISOString();
     try {
       const url = new URL(ARCTIC_BASE);
-      url.searchParams.set("subreddit", "forhire");
+      url.searchParams.set("subreddit", "entrepreneur");
       url.searchParams.set("limit", "1");
       url.searchParams.set("sort", "desc");
 
@@ -165,12 +192,13 @@ export const redditArcticSource: SourceAdapter = {
 
   async search(profile: ServiceProfile, limit: number): Promise<SearchResult> {
     const capturedAt = new Date().toISOString();
+    const afterTs = Math.floor(Date.now() / 1000) - LOOKBACK_SECONDS;
     const errors: string[] = [];
     const seen = new Set<string>();
     const signals: CandidateSignal[] = [];
 
     const results = await Promise.allSettled(
-      LEAD_SUBREDDITS.map((sub) => fetchSubreddit(sub, limit)),
+      LEAD_SUBREDDITS.map((sub) => fetchSubreddit(sub, limit, afterTs)),
     );
 
     for (let i = 0; i < results.length; i++) {
@@ -207,8 +235,8 @@ export const redditArcticSource: SourceAdapter = {
 
     const status = errors.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS";
     const detail = errors.length > 0
-      ? `${signals.length} signals from ${LEAD_SUBREDDITS.length - errors.length} subreddits. Failed: ${errors.join("; ")}`
-      : `${signals.length} candidate signals from ${LEAD_SUBREDDITS.join(", ")}.`;
+      ? `${signals.length} signals from ${LEAD_SUBREDDITS.length - errors.length} subreddits (last 48 h). Failed: ${errors.join("; ")}`
+      : `${signals.length} candidate signals from ${LEAD_SUBREDDITS.join(", ")} (last 48 h).`;
 
     return { status, detail, signals: signals.slice(0, limit) };
   },
