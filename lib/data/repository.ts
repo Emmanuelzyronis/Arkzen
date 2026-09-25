@@ -18,16 +18,9 @@ import { migrate } from "./migrations";
 import type { SqlDriver } from "./types";
 
 /**
- * One in-flight readiness promise per owner.
- *
- * Keyed by owner rather than held as a single promise because the seed is per
- * person: everyone's first visit gets them their own copy of the reviewed
- * corpus. The promise (rather than a flag) is what keeps that safe. A page asks
- * for several things at once — `Promise.all([listOpportunities(), …])` — so
- * without memoizing the *whole* seed, two concurrent first requests would both
- * count zero, both seed, and the owner would open their new workspace to
- * duplicate activities. Activities have no uniqueness to fall back on the way
- * opportunities do.
+ * One in-flight readiness promise per owner so concurrent first-visit requests
+ * share a single migration check rather than racing to migrate in parallel.
+ * New workspaces start empty — there is no auto-seeding.
  */
 const readyByOwner = new Map<string, Promise<void>>();
 
@@ -52,15 +45,7 @@ export async function ensureReady(ownerId: string): Promise<void> {
   if (!pending) {
     pending = (async () => {
       await ensureMigrated();
-      const driver = await getDriver();
-      // Counted for this owner, not for the table: an empty workspace is what
-      // seeds, and someone signing in to a database that already holds other
-      // people's leads must still get their own.
-      const rows = await driver.query<{ count: number | string }>(
-        "select count(*) as count from opportunities where owner_id = ?",
-        [ownerId],
-      );
-      // No auto-seeding — workspace starts empty, operator populates via search.
+      void ownerId; // schema is ready; new workspaces start empty
     })().catch((error) => {
       readyByOwner.delete(ownerId);
       throw error;
