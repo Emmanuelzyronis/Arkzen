@@ -4,17 +4,53 @@ import type { SearchResult, SourceAdapter, SourceCapabilities, SourceHealth } fr
 const ARCTIC_BASE = "https://arctic-shift.photon-reddit.com/api/posts/search";
 const TIMEOUT_MS = 15_000;
 
+/** Max subreddits per run — keeps API call count predictable. */
+const MAX_SUBREDDITS = 5;
+
 /**
- * Subreddits that surface "I need X built, budget $Y" or similar demand-side
- * posts. The mix covers dedicated hiring communities plus founder communities
- * where people post about needing technical help.
+ * Catalog of subreddits with topic tags. The adapter selects from this at
+ * search time based on the profile's description, capabilities, and keywords
+ * so the search space updates automatically when the operator edits their
+ * profile rather than requiring a code change.
+ *
+ * `always: true` = included for any profile (broad hiring communities).
+ * `tags` = profile text must contain at least one tag to include the subreddit.
  */
-const LEAD_SUBREDDITS = [
-  "forhire",        // [Hiring] flair = demand side; pipeline supply filter catches [For Hire]
-  "smallbusiness",  // business owners who need automation / tech help
-  "SaaS",           // founders who need tech built
-  "entrepreneur",   // business owners looking for help
-] as const;
+const SUBREDDIT_CATALOG: ReadonlyArray<{
+  sub: string;
+  tags: ReadonlyArray<string>;
+  always?: true;
+}> = [
+  { sub: "forhire",       tags: [],                                          always: true },
+  { sub: "entrepreneur",  tags: [],                                          always: true },
+  { sub: "SaaS",          tags: ["saas", "software", "startup", "ai", "automation", "product"] },
+  { sub: "smallbusiness", tags: ["small business", "smb", "operations", "automation", "tools", "workflow"] },
+  { sub: "webdev",        tags: ["react", "next.js", "frontend", "web", "website", "javascript", "typescript"] },
+  { sub: "startups",      tags: ["startup", "founder", "mvp", "product", "venture"] },
+  { sub: "nocode",        tags: ["automation", "zapier", "airtable", "make.com", "n8n", "nocode", "no-code", "workflow"] },
+  { sub: "devops",        tags: ["infrastructure", "ci/cd", "deployment", "cloud", "aws", "terraform", "docker"] },
+  { sub: "datascience",   tags: ["data", "analytics", "ml", "llm", "ai", "model", "pipeline", "postgres", "sql"] },
+];
+
+/**
+ * Pick subreddits from the catalog by matching their tags against the profile's
+ * description, capabilities and keywords. Always-included entries come first;
+ * tagged entries are appended in catalog order up to MAX_SUBREDDITS.
+ */
+function selectSubreddits(profile: ServiceProfile): string[] {
+  const profileText = [
+    profile.description ?? "",
+    ...(profile.capabilities ?? []),
+    ...(profile.keywords ?? []),
+  ].join(" ").toLowerCase();
+
+  const always = SUBREDDIT_CATALOG.filter((e) => e.always).map((e) => e.sub);
+  const tagged = SUBREDDIT_CATALOG
+    .filter((e) => !e.always && e.tags.some((tag) => profileText.includes(tag)))
+    .map((e) => e.sub);
+
+  return [...always, ...tagged].slice(0, MAX_SUBREDDITS);
+}
 
 /**
  * Phrases that indicate demand-side intent. Broad enough to capture founders
@@ -148,7 +184,7 @@ export const redditArcticSource: SourceAdapter = {
     return {
       requiresCredentials: false,
       live: true,
-      notes: "Arctic Shift open archiver — no auth required. Covers forhire, smallbusiness, SaaS, entrepreneur.",
+      notes: "Arctic Shift open archiver — no auth required. Subreddits are selected per-run from a catalog based on the active watch profile.",
       modes: ["lead-gen"],
     };
   },
@@ -193,17 +229,18 @@ export const redditArcticSource: SourceAdapter = {
   async search(profile: ServiceProfile, limit: number): Promise<SearchResult> {
     const capturedAt = new Date().toISOString();
     const afterTs = Math.floor(Date.now() / 1000) - LOOKBACK_SECONDS;
+    const subreddits = selectSubreddits(profile);
     const errors: string[] = [];
     const seen = new Set<string>();
     const signals: CandidateSignal[] = [];
 
     const results = await Promise.allSettled(
-      LEAD_SUBREDDITS.map((sub) => fetchSubreddit(sub, limit, afterTs)),
+      subreddits.map((sub) => fetchSubreddit(sub, limit, afterTs)),
     );
 
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
-      const subreddit = LEAD_SUBREDDITS[i];
+      const subreddit = subreddits[i];
 
       if (result.status === "rejected") {
         errors.push(`r/${subreddit}: ${(result.reason as Error).message}`);
@@ -225,7 +262,7 @@ export const redditArcticSource: SourceAdapter = {
       }
     }
 
-    if (signals.length === 0 && errors.length === LEAD_SUBREDDITS.length) {
+    if (signals.length === 0 && errors.length === subreddits.length) {
       return {
         status: "PROVIDER_ERROR",
         detail: `Arctic Shift unreachable for all subreddits. Errors: ${errors.join("; ")}`,
@@ -235,8 +272,8 @@ export const redditArcticSource: SourceAdapter = {
 
     const status = errors.length > 0 ? "PARTIAL_SUCCESS" : "SUCCESS";
     const detail = errors.length > 0
-      ? `${signals.length} signals from ${LEAD_SUBREDDITS.length - errors.length} subreddits (last 48 h). Failed: ${errors.join("; ")}`
-      : `${signals.length} candidate signals from ${LEAD_SUBREDDITS.join(", ")} (last 48 h).`;
+      ? `${signals.length} signals from ${subreddits.length - errors.length} subreddits (last 48 h). Failed: ${errors.join("; ")}`
+      : `${signals.length} candidate signals from ${subreddits.join(", ")} (last 48 h).`;
 
     return { status, detail, signals: signals.slice(0, limit) };
   },
