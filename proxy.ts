@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
  * Every handler that touches workspace data re-checks the session itself —
  * see `lib/api-auth.ts`.
  */
-const PUBLIC_PREFIXES = ["/sign-in", "/sign-up"];
+const PUBLIC_PREFIXES = ["/sign-in", "/sign-up", "/api/cron"];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(
