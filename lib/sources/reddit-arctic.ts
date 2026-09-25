@@ -10,10 +10,10 @@ const TIMEOUT_MS = 15_000;
  * where people post about needing technical help.
  */
 const LEAD_SUBREDDITS = [
-  "forhire",       // [Hiring] flair = demand side; pipeline supply filter catches [For Hire]
-  "hireadev",      // explicit demand-side dev hiring community
-  "SaaS",          // founders who need tech built
-  "entrepreneur",  // business owners looking for help
+  "forhire",        // [Hiring] flair = demand side; pipeline supply filter catches [For Hire]
+  "smallbusiness",  // business owners who need automation / tech help
+  "SaaS",           // founders who need tech built
+  "entrepreneur",   // business owners looking for help
 ] as const;
 
 /**
@@ -148,7 +148,7 @@ export const redditArcticSource: SourceAdapter = {
     return {
       requiresCredentials: false,
       live: true,
-      notes: "Arctic Shift open archiver — no auth required. Covers forhire, hireadev, SaaS, entrepreneur.",
+      notes: "Arctic Shift open archiver — no auth required. Covers forhire, smallbusiness, SaaS, entrepreneur.",
       modes: ["lead-gen"],
     };
   },
