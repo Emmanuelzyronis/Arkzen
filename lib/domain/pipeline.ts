@@ -32,6 +32,13 @@ const SUPPLY_SIDE_PATTERNS: Array<{ rule: string; test: RegExp; reason: string }
     reason: "This is someone selling their own services, not buying.",
   },
   {
+    // Catches "I've been building marketing agents for three years" and similar
+    // — the author is describing their own product, not buying ours.
+    rule: "supply-side post",
+    test: /i(?:'ve| have) been (?:building|creating|developing|running|shipping) (?:\w+ ){0,2}(?:agents?|bots?|tools?|systems?|apps?|software|platforms?|services?|automation)/i,
+    reason: "The author describes building their own product or service, not buying.",
+  },
+  {
     rule: "promotional post",
     test: /guaranteed results|limited spots|dm me the word|print money|while you sleep|no experience needed/i,
     reason: "Promotional or spam language — nothing to pursue.",
@@ -102,6 +109,24 @@ export function filterSignals(
       continue;
     }
 
+    // Require at least one watch keyword from the service profile. Without
+    // this gate, any long post that dodges the supply-side patterns can score
+    // into Watch purely from freshness and reachability — no topic relevance
+    // required. Only applied when the profile has keywords configured.
+    if (profile.keywords.length > 0) {
+      const hasKeyword = profile.keywords.some((kw) =>
+        normalized.includes(kw.toLowerCase()),
+      );
+      if (!hasKeyword) {
+        rejected.push({
+          signal,
+          rule: "no-keyword-match",
+          reason: "None of your watch keywords appear in this post.",
+        });
+        continue;
+      }
+    }
+
     kept.push(signal);
   }
 
@@ -148,36 +173,50 @@ export function buildOpportunities(
   const { kept, rejected } = filterSignals(signals, profile);
   const { unique, duplicates } = dedupeSignals(kept);
 
-  const opportunities = unique
-    .map((signal) => {
-      const dimensions = scoreSignal(signal, profile, now);
-      const qualification = qualify(signal, dimensions, dimensions.score, dimensions.risks);
-      const strategy = buildStrategy(signal, dimensions, qualification, now);
-      const nextAction = buildNextAction(signal, dimensions, qualification, now);
-      const intentBand =
-        dimensions.intent.band === "high" ? "Strong" : dimensions.intent.band === "medium" ? "Moderate" : "Weak";
+  const scored = unique.map((signal) => {
+    const dimensions = scoreSignal(signal, profile, now);
+    const qualification = qualify(signal, dimensions, dimensions.score, dimensions.risks);
+    const strategy = buildStrategy(signal, dimensions, qualification, now);
+    const nextAction = buildNextAction(signal, dimensions, qualification, now);
+    const intentBand =
+      dimensions.intent.band === "high" ? "Strong" : dimensions.intent.band === "medium" ? "Moderate" : "Weak";
 
-      return {
-        id: `opp_${fingerprintSignal(signal)}`,
-        signal,
-        category: dimensions.category.category,
-        needSummary: keywordExcerpt(signal.title, signal.content),
-        intentSummary: summarizeIntent(dimensions.intent.checks, intentBand),
-        fit: dimensions.fit,
-        intent: dimensions.intent,
-        urgency: dimensions.urgency,
-        reachability: dimensions.reachability,
-        score: dimensions.score,
-        band: dimensions.band,
-        reasons: dimensions.reasons,
-        risks: dimensions.risks,
-        qualification,
-        strategy,
-        nextAction,
-        matchReason: matchReasonFor(dimensions.category.category, dimensions.category.matched, dimensions.score),
-      } satisfies ScoredOpportunity;
-    })
+    return {
+      id: `opp_${fingerprintSignal(signal)}`,
+      signal,
+      category: dimensions.category.category,
+      needSummary: keywordExcerpt(signal.title, signal.content),
+      intentSummary: summarizeIntent(dimensions.intent.checks, intentBand),
+      fit: dimensions.fit,
+      intent: dimensions.intent,
+      urgency: dimensions.urgency,
+      reachability: dimensions.reachability,
+      score: dimensions.score,
+      band: dimensions.band,
+      reasons: dimensions.reasons,
+      risks: dimensions.risks,
+      qualification,
+      strategy,
+      nextAction,
+      matchReason: matchReasonFor(dimensions.category.category, dimensions.category.matched, dimensions.score),
+    } satisfies ScoredOpportunity;
+  });
+
+  // Signals that cleared the filter funnel but scored below Watch are not
+  // actionable — they have keyword overlap but no real buying signal. Surface
+  // them as rejected so they appear in the Filtered Out view rather than
+  // cluttering the opportunity queue.
+  const belowThreshold: RejectedSignal[] = scored
+    .filter((opp) => opp.score < 52)
+    .map((opp) => ({
+      signal: opp.signal,
+      rule: "low-score",
+      reason: `Score ${opp.score} — below the Watch threshold. Keyword match but no clear buying intent.`,
+    }));
+
+  const opportunities = scored
+    .filter((opp) => opp.score >= 52)
     .sort((a, b) => b.score - a.score);
 
-  return { opportunities, rejected, duplicates, observed };
+  return { opportunities, rejected: [...rejected, ...belowThreshold], duplicates, observed };
 }

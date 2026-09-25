@@ -11,6 +11,8 @@ const RULE_TONE: Record<string, "down" | "neutral"> = {
   "promotional post": "down",
   "unpaid work": "neutral",
   "too thin": "neutral",
+  "no-keyword-match": "neutral",
+  "low-score": "neutral",
   "negative pattern": "down",
   duplicate: "neutral",
 };
@@ -20,6 +22,8 @@ const RULE_LABEL: Record<string, string> = {
   "promotional post": "Promotional",
   "unpaid work": "Unpaid",
   "too thin": "Too short",
+  "no-keyword-match": "Off-topic",
+  "low-score": "Low score",
   "negative pattern": "Blocked keyword",
   duplicate: "Duplicate",
 };
