@@ -10,6 +10,7 @@ import { Pill } from "@/components/ui/pill";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/segmented";
 import { bandLabel, outcomeLabel, statusLabel } from "@/lib/plain";
 import { categoryLabel } from "@/lib/domain/category";
+import { needAddsDetail } from "@/lib/domain/summary";
 import { humanizeAge } from "@/lib/domain/text";
 import type { OpportunityListItem } from "@/lib/data/repository";
 import type { Column } from "@/lib/table";
@@ -26,18 +27,6 @@ import type { SheetColumn } from "@/components/ui/spreadsheet";
 
 const category = (item: OpportunityListItem) => categoryLabel(item.category);
 
-/**
- * A 0-100 dimension score, as a plain right-aligned figure.
- *
- * Deliberately not a bar. Four share bars per row put twenty bars on a screen
- * where they all read the same shade of green, which is decoration pretending to
- * be data. The reference gives exactly one column a bar — the ranking column
- * does, below — and precision belongs in the number.
- */
-function dimension(value: number) {
-  return <span className="tabular-nums">{value}</span>;
-}
-
 const TABLE_COLUMNS: Column<OpportunityListItem>[] = [
   {
     key: "title",
@@ -46,7 +35,9 @@ const TABLE_COLUMNS: Column<OpportunityListItem>[] = [
     render: (item) => (
       <span className="block max-w-[340px]">
         <span className="line-clamp-2 font-medium leading-snug text-fg">{item.title}</span>
-        <span className="mt-0.5 block truncate text-[12px] text-fg-muted">{category(item)}</span>
+        <span className="mt-0.5 block truncate text-[12px] text-fg-muted">
+          {needAddsDetail(item.title, item.needSummary) ? item.needSummary : category(item)}
+        </span>
       </span>
     ),
   },
@@ -73,38 +64,6 @@ const TABLE_COLUMNS: Column<OpportunityListItem>[] = [
         </Pill>
       </span>
     ),
-  },
-  {
-    key: "fit",
-    header: "Fit",
-    align: "right",
-    hint: "How closely the ask matches what you sell.",
-    value: (item) => item.fitValue,
-    render: (item) => dimension(item.fitValue),
-  },
-  {
-    key: "intent",
-    header: "Intent",
-    align: "right",
-    hint: "How clearly they are asking for help rather than musing.",
-    value: (item) => item.intentValue,
-    render: (item) => dimension(item.intentValue),
-  },
-  {
-    key: "urgency",
-    header: "Urgency",
-    align: "right",
-    hint: "Whether there is a deadline or a live problem behind it.",
-    value: (item) => item.urgencyValue,
-    render: (item) => dimension(item.urgencyValue),
-  },
-  {
-    key: "reachability",
-    header: "Reach",
-    align: "right",
-    hint: "How easy they are to contact.",
-    value: (item) => item.reachabilityValue,
-    render: (item) => dimension(item.reachabilityValue),
   },
   {
     key: "status",

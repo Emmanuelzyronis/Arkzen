@@ -146,7 +146,7 @@ describe("full pipeline", () => {
     expect(hero.band).toBe("High");
     expect(hero.qualification.verdict).toBe("QUALIFIED");
     expect(hero.fit.checks[0].detail).toContain("AI integration & RAG");
-    expect(hero.strategy.suggestedMessage).toContain("r/startups");
+    expect(hero.strategy.suggestedMessage).toContain("Hacker News");
   });
 
   it("flags an unstated budget as a risk instead of ignoring it", async () => {

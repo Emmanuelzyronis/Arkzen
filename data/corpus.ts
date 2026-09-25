@@ -297,7 +297,7 @@ Looking for someone passionate who believes in the vision, not just a code monke
     sourceName: "Remotive",
     canonicalUrl: "https://remotive.com/jobs/corpus_selfpromo",
     title: "For Hire: Senior full-stack dev, 8 years React/Node, available now",
-    content: `Senior developer available for contract work. React, Node, Postgres, AWS. I've worked with startups and enterprises, and I ship fast without breaking things. Portfolio and references available on request. DM me with your project.`,
+    content: `Senior developer available for hire. React, Node, Postgres, AWS. I've worked with startups and enterprises, and I ship fast without breaking things. Portfolio and references available on request. I specialise in scalable APIs, real-time apps, and data-intensive dashboards. Open to long-term contracts or short fixed-scope projects. DM me with your project details and I'll get back same day.`,
     author: { handle: "dev_available_now", displayName: "K" },
     ageHours: 12,
     provenance: { source: "Remotive", category: "For Hire", signal: "supply-not-demand" },

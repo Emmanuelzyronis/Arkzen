@@ -37,6 +37,16 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
     },
   ];
 
+  const evidenceItems = [
+    ...opportunity.fit.checks,
+    ...opportunity.intent.checks,
+    ...opportunity.urgency.checks,
+    ...opportunity.reachability.checks,
+  ]
+    .filter((check) => check.status === "pass")
+    .slice(0, 5)
+    .map((check) => `${check.label} — ${check.detail}`);
+
   return (
     <div className="space-y-3">
       <Card>
@@ -82,7 +92,7 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
             ) : null}
           </div>
 
-          <p className="text-[13px] leading-relaxed text-fg-soft">{opportunity.matchReason}</p>
+          <p className="text-[13px] leading-relaxed text-fg-soft">{opportunity.intentSummary}</p>
         </CardBody>
       </Card>
 
@@ -174,9 +184,41 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
                     </ul>
                   </div>
                 ) : null}
+                {opportunity.strategy.objections.length > 0 ? (
+                  <div className="border-t border-line pt-3">
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <p className="text-[11px] font-medium text-fg-muted">Most likely pushback</p>
+                      <Pill
+                        tone={
+                          opportunity.strategy.objections[0].likelihood === "likely" ? "down" : "neutral"
+                        }
+                      >
+                        {opportunity.strategy.objections[0].likelihood}
+                      </Pill>
+                    </div>
+                    <Angle
+                      label={opportunity.strategy.objections[0].objection}
+                      body={opportunity.strategy.objections[0].response}
+                    />
+                  </div>
+                ) : null}
               </CardBody>
             </Card>
           ) : null}
+
+          <Card>
+            <CardHeader
+              title="How to approach this"
+              subtitle={`Positioning guide for this ${categoryLabel(opportunity.category).toLowerCase()} opportunity.`}
+            />
+            <CardBody className="space-y-2.5">
+              <p className="text-[12px] leading-relaxed text-fg-soft">
+                {opportunity.strategy.approach}
+              </p>
+              <Angle label="Do" body={opportunity.strategy.leadWith} />
+              <Angle label="Don't" body={opportunity.strategy.avoid} />
+            </CardBody>
+          </Card>
 
           <RecordOutcome
             opportunityId={opportunity.id}
@@ -191,25 +233,18 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
             <CardHeader title="At a glance" />
             <CardBody className="space-y-3">
               <Verdict opportunity={opportunity} />
-              {opportunity.qualification.whyQualified.length > 0 ? (
+              {opportunity.qualification.unknowns.length > 0 ? (
                 <Bullets
-                  label="Why it's worth a look"
-                  items={opportunity.qualification.whyQualified}
-                  tone="up"
+                  label="Couldn't confirm from the post"
+                  items={opportunity.qualification.unknowns}
+                  tone="neutral"
                 />
-              ) : null}
-              {opportunity.reasons.length > 0 ? (
-                <Bullets label="What stood out" items={opportunity.reasons} tone="neutral" />
               ) : null}
               {opportunity.risks.length > 0 ? (
                 <Bullets label="What could go wrong" items={opportunity.risks} tone="down" />
               ) : null}
-              {opportunity.qualification.unknowns.length > 0 ? (
-                <Bullets
-                  label="Nobody has checked yet"
-                  items={opportunity.qualification.unknowns}
-                  tone="warn"
-                />
+              {evidenceItems.length > 0 ? (
+                <Bullets label="What the evidence shows" items={evidenceItems} tone="up" />
               ) : null}
             </CardBody>
           </Card>
@@ -217,7 +252,11 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
           <Card>
             <CardHeader
               title="Do this next"
-              subtitle={`Chosen on ${scoredAt}, when this was found.`}
+              subtitle={
+                opportunity.activities.length > 0
+                  ? `Based on scoring from ${scoredAt} — you've acted since then, so check below.`
+                  : `Chosen on ${scoredAt}, when this was found.`
+              }
             />
             <CardBody className="space-y-2">
               <p className="text-[13px] font-medium leading-relaxed text-fg">
@@ -230,6 +269,19 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
                 <Pill tone="outline">By {opportunity.nextAction.due}</Pill>
                 <Pill tone="outline">Via {opportunity.nextAction.channel}</Pill>
               </div>
+              {opportunity.strategy.followUpPlan.length > 0 ? (
+                <div className="border-t border-line pt-2">
+                  <p className="text-[11px] font-medium text-fg-muted">If they reply</p>
+                  <ol className="mt-1.5 space-y-1">
+                    {opportunity.strategy.followUpPlan.map((step, i) => (
+                      <li key={i} className="flex gap-2 text-[12px] leading-relaxed text-fg-soft">
+                        <span className="tabular-nums text-fg-muted">{i + 1}.</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
             </CardBody>
           </Card>
 
