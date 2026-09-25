@@ -125,23 +125,37 @@ export function FindLeads() {
     : "Find leads";
 
   return (
-    <Button
-      type="button"
-      variant={foundFlash ? "default" : "secondary"}
-      size="sm"
-      onClick={run}
-      disabled={running}
-      className="transition-all duration-300"
-    >
-      {foundFlash ? (
-        <CheckCircle aria-hidden="true" className="size-3.5 text-green-400" />
-      ) : (
-        <Search
-          aria-hidden="true"
-          className={`size-3.5 ${running ? "animate-pulse" : ""}`}
-        />
-      )}
-      <span className="transition-all duration-300">{label}</span>
-    </Button>
+    <>
+      {/* Progress bar keyframe: 0 → 95% over 18 s, stops there to signal "almost done" */}
+      <style>{`@keyframes arkzen-progress { from { width: 0% } to { width: 95% } }`}</style>
+      <div className="inline-flex flex-col gap-1">
+        <Button
+          type="button"
+          variant={foundFlash ? "accent" : "secondary"}
+          size="sm"
+          onClick={run}
+          disabled={running}
+          className="transition-all duration-300"
+        >
+          {foundFlash ? (
+            <CheckCircle aria-hidden="true" className="size-3.5 text-green-400" />
+          ) : (
+            <Search
+              aria-hidden="true"
+              className={`size-3.5 ${running ? "animate-spin" : ""}`}
+            />
+          )}
+          <span className="transition-all duration-300">{label}</span>
+        </Button>
+        {running && (
+          <div className="h-0.5 w-full overflow-hidden rounded-full bg-fg-muted/20">
+            <div
+              className="h-full bg-brand"
+              style={{ animation: "arkzen-progress 18s ease-out forwards" }}
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 }

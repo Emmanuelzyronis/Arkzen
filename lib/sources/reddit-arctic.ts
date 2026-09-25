@@ -184,6 +184,7 @@ export const redditArcticSource: SourceAdapter = {
 
       for (const post of result.value) {
         if (!post.id || seen.has(post.id)) continue;
+        if (post.selftext === "[removed]") continue;
 
         const combined = `${post.title ?? ""} ${post.selftext ?? ""}`;
 

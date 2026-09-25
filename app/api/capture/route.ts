@@ -11,49 +11,18 @@ import {
   recordSourceHealth,
 } from "@/lib/data/repository";
 import { getDriver } from "@/lib/data/driver";
-import { readBody, readText } from "@/lib/api";
 import { requireUser } from "@/lib/api-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-/** Plain-language capture: what the operator wants Arkzen to watch for. */
-function profileFromIntent(text: string): ServiceProfile {
-  const trimmed = text.trim();
-  if (!trimmed) return defaultServiceProfile;
-  const keywords = [
-    ...new Set(
-      trimmed
-        .toLowerCase()
-        .split(/[^a-z0-9+#.-]+/)
-        .filter((word) => word.length > 3)
-        .slice(0, 24),
-    ),
-  ];
-  return {
-    ...defaultServiceProfile,
-    description: trimmed,
-    keywords: keywords.length > 0 ? keywords : defaultServiceProfile.keywords,
-  };
-}
-
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   const session = await requireUser();
   if (!session.ok) return session.response;
 
-  const parsed = await readBody(request);
-  const body = parsed.ok ? parsed.body : {};
-
-  const intent = readText(body, "intent", { max: 2000, label: "What to watch for" });
-  if (!intent.ok) return intent.response;
-
   const savedProfile = await getServiceProfile(session.userId);
-  const baseProfile = profileFromIntent(intent.value ?? "");
-  const profile: ServiceProfile = {
-    ...baseProfile,
-    mode: savedProfile?.mode ?? "lead-gen",
-  };
+  const profile: ServiceProfile = savedProfile ?? defaultServiceProfile;
   const startedAt = new Date().toISOString();
   const { signals, runs } = await acquireAll({ profile, limitPerSource: 25 });
   const result = buildOpportunities(signals, profile, new Date());
@@ -94,9 +63,7 @@ export async function POST(request: Request) {
       startedAt,
       completedAt: new Date().toISOString(),
       status: runs.every((run) => run.status === "SUCCESS") ? "SUCCESS" : "PARTIAL_SUCCESS",
-      detail: intent.value
-        ? `Capture run for: ${intent.value}`
-        : "Capture run with the default watch profile.",
+      detail: "Capture run with the configured watch profile.",
       observed: result.observed,
       kept: result.opportunities.length,
       rejected: result.rejected.length,
