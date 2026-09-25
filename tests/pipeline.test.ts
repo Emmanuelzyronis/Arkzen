@@ -135,7 +135,7 @@ describe("full pipeline", () => {
       expect(opportunity.qualification.verdict).toMatch(/QUALIFIED|NEEDS_REVIEW|WEAK/);
       expect(opportunity.strategy.suggestedMessage.length).toBeGreaterThan(80);
       expect(opportunity.nextAction.action.length).toBeGreaterThan(10);
-      expect(opportunity.research.some((finding) => finding.kind === "observed")).toBe(true);
+      expect(opportunity.qualification.whyQualified.length).toBeGreaterThan(0);
     }
   });
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FindLeads } from "@/components/opportunities/find-leads";
 import { OpportunityViews } from "@/components/opportunities/opportunity-views";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -54,16 +55,20 @@ export async function OpportunityScreen({ slug, range, from, to }: { slug: strin
           <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-fg">{view.label}</h2>
           <p className="mt-1 text-[13px] text-fg-muted">{view.blurb}</p>
         </div>
-        <p className="text-[12px] text-fg-muted">
-          {/* Compared against this view's own total, not the whole corpus: "6 of
-              6" is noise, and only the period actually hiding something is worth
-              saying. Comparing against `all` would report the period as lossy on
-              a route where the view filter, not the period, is doing the work. */}
-          {items.length === matchingAll
-            ? `${count(items.length)} found`
-            : `${count(items.length)} of ${count(matchingAll)} found`}{" "}
-          · {resolved.label}
-        </p>
+        <div className="flex items-center gap-4">
+          <p className="text-[12px] text-fg-muted">
+            {/* Compared against this view's own total, not the whole corpus: "6 of
+                6" is noise, and only the period actually hiding something is worth
+                saying. Comparing against `all` would report the period as lossy on
+                a route where the view filter, not the period, is doing the work. */}
+            {items.length === matchingAll
+              ? `${count(items.length)} found`
+              : `${count(items.length)} of ${count(matchingAll)} found`}{" "}
+            · {resolved.label}
+          </p>
+          {/* Always visible — an empty queue needs the trigger more than a full one. */}
+          <FindLeads />
+        </div>
       </div>
 
       {items.length === 0 ? (

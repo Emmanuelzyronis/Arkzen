@@ -22,7 +22,7 @@ describe("probe", () => {
         "| risks", JSON.stringify(opportunity.risks),
         "| objections", JSON.stringify(opportunity.strategy.objections.map((objection) => objection.objection)),
         "| draft", JSON.stringify(opportunity.strategy.suggestedMessage.split("\n").filter((line) => line.includes("here:") || line.includes("figure you named") || line.includes("workable") || line.includes("figure out the budget"))),
-        "| research", JSON.stringify(opportunity.research.map((finding) => `${finding.kind}:${finding.label}`)),
+        "| reasons", JSON.stringify(opportunity.reasons),
       );
     }
     const hero = result.opportunities[0];

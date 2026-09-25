@@ -127,12 +127,6 @@ export type OpportunityCategory =
   | "backend"
   | "data";
 
-export interface ResearchFinding {
-  kind: "observed" | "inference" | "unknown";
-  label: string;
-  detail: string;
-}
-
 export interface Qualification {
   verdict: "QUALIFIED" | "NEEDS_REVIEW" | "WEAK";
   confidence: number;
@@ -184,7 +178,6 @@ export interface ScoredOpportunity {
   reasons: string[];
   risks: string[];
   qualification: Qualification;
-  research: ResearchFinding[];
   strategy: Strategy;
   nextAction: NextAction;
   matchReason: string;

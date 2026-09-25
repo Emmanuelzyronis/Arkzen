@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 import { categoryLabel } from "./category";
 import { qualify } from "./qualification";
-import { researchSignal } from "./research";
 import { scoreSignal } from "./scoring";
 import { buildNextAction, buildStrategy } from "./strategy";
 import { keywordExcerpt } from "./summary";
@@ -153,7 +152,6 @@ export function buildOpportunities(
     .map((signal) => {
       const dimensions = scoreSignal(signal, profile, now);
       const qualification = qualify(signal, dimensions, dimensions.score, dimensions.risks);
-      const research = researchSignal(signal, dimensions, now);
       const strategy = buildStrategy(signal, dimensions, qualification, now);
       const nextAction = buildNextAction(signal, dimensions, qualification, now);
       const intentBand =
@@ -174,7 +172,6 @@ export function buildOpportunities(
         reasons: dimensions.reasons,
         risks: dimensions.risks,
         qualification,
-        research,
         strategy,
         nextAction,
         matchReason: matchReasonFor(dimensions.category.category, dimensions.category.matched, dimensions.score),

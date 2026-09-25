@@ -172,13 +172,6 @@ export function scoreSignal(
               ? `At or above your minimum engagement (${profile.minimumEngagement}).`
               : `Below your minimum engagement (${profile.minimumEngagement}).`,
       },
-      {
-        label: "Confirmed with the buyer",
-        status: "unknown" as const,
-        weight: 1.5,
-        detail:
-          "Not yet — everything above is inferred from public evidence, so the score is deliberately discounted until a human confirms it.",
-      },
     ],
   );
 
@@ -216,7 +209,7 @@ export function scoreSignal(
         label: matchedTerms(text, AUTHORITY_PHRASES).length > 0 ? "Decision-maker voice" : "Decision authority unclear",
         status: matchedTerms(text, AUTHORITY_PHRASES).length > 0 ? "pass" : "unknown",
         weight: 1.5,
-        detail: "“We run / I own / our team” indicates the author can approve work.",
+        detail: '"We run / I own / our team" indicates the author can approve work.',
       },
       {
         label: matchedTerms(text, PAIN_PHRASES).length > 0 ? "Cost of inaction described" : "Cost of inaction not quantified",
@@ -228,14 +221,7 @@ export function scoreSignal(
         label: matchedTerms(text, TIMELINE_PHRASES).length > 0 ? "Timing mentioned" : "No timing mentioned",
         status: matchedTerms(text, TIMELINE_PHRASES).length > 0 ? "pass" : "unknown",
         weight: 1,
-        detail: "Timing is commitment: it separates “someday” from “this quarter”.",
-      },
-      {
-        label: "Confirmed with the buyer",
-        status: "unknown" as const,
-        weight: 1.5,
-        detail:
-          "Not yet — everything above is inferred from public evidence, so the score is deliberately discounted until a human confirms it.",
+        detail: 'Timing is commitment: it separates "someday" from "this quarter".',
       },
     ],
   );
@@ -270,13 +256,6 @@ export function scoreSignal(
           questions > 0
             ? "Questions invite a reply and lower the cost of the first message."
             : "A statement of need is fine — lead with a concrete plan.",
-      },
-      {
-        label: "Confirmed with the buyer",
-        status: "unknown" as const,
-        weight: 1.5,
-        detail:
-          "Not yet — everything above is inferred from public evidence, so the score is deliberately discounted until a human confirms it.",
       },
     ],
   );
@@ -319,13 +298,6 @@ export function scoreSignal(
         weight: 1.5,
         detail: "Reply in the same place the request was made — it is verifiable and low-pressure.",
       },
-      {
-        label: "Confirmed with the buyer",
-        status: "unknown" as const,
-        weight: 1.5,
-        detail:
-          "Not yet — everything above is inferred from public evidence, so the score is deliberately discounted until a human confirms it.",
-      },
     ],
   );
 
@@ -336,6 +308,8 @@ export function scoreSignal(
   const reasons = [
     ...fit.checks.filter((check) => check.status === "pass").map((check) => check.label),
     ...intent.checks.filter((check) => check.status === "pass").map((check) => check.label),
+    ...urgency.checks.filter((check) => check.status === "pass").map((check) => check.label),
+    ...reachability.checks.filter((check) => check.status === "pass").map((check) => check.label),
   ].slice(0, 5);
 
   const risks = [

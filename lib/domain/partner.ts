@@ -23,7 +23,7 @@ function groundingFor(opportunity: Opportunity, activities: Activity[]): string[
     `Original post in ${opportunity.signal.sourceName} (${humanizeAge(opportunity.signal.publishedAt)})`,
     `Fit ${opportunity.fit.value}/100 · Intent ${opportunity.intent.value}/100 · Urgency ${opportunity.urgency.value}/100`,
     `Qualification: ${opportunity.qualification.verdict.replace(/_/g, " ").toLowerCase()} (confidence ${opportunity.qualification.confidence}%)`,
-    `${opportunity.research.filter((finding) => finding.kind === "observed").length} observed facts, ${opportunity.research.filter((finding) => finding.kind === "inference").length} inferences, ${opportunity.research.filter((finding) => finding.kind === "unknown").length} unknowns`,
+    `Evidence: ${opportunity.qualification.whyQualified.slice(0, 2).join("; ")}`,
     `Status: ${opportunity.status}${opportunity.outcome ? ` · Outcome: ${opportunity.outcome.replace(/_/g, " ").toLowerCase()}` : ""}`,
   ];
   if (activities.length > 0) {
@@ -274,10 +274,10 @@ function deterministicAsk(opportunity: Opportunity, question: string): PartnerRe
     return {
       headline: `Context on ${opportunity.signal.author.handle}`,
       recommendation: `Work only from what was observed: ${opportunity.signal.author.role ?? "role not stated"}${opportunity.signal.author.org ? ` at ${opportunity.signal.author.org}` : ""}. Anything beyond that is an inference and should be verified in the first reply.`,
-      rationale: opportunity.research
-        .filter((finding) => finding.kind !== "unknown")
-        .slice(0, 4)
-        .map((finding) => `${finding.label}: ${finding.detail}`),
+      rationale: [
+        opportunity.signal.author.role ? `Role: ${opportunity.signal.author.role}` : "Role not stated in the post.",
+        ...(opportunity.signal.author.publicContext ?? []).slice(0, 3),
+      ].filter(Boolean),
       grounding: base,
       suggestedMessage: null,
       objections: [],

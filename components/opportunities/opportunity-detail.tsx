@@ -1,6 +1,7 @@
-import { ArrowUpRight, CircleHelp, ExternalLink } from "lucide-react";
+import { ArrowUpRight, CircleHelp, ExternalLink, MessageSquare } from "lucide-react";
 
 import { RecordOutcome } from "@/components/opportunities/record-outcome";
+import { CopyButton } from "@/components/ui/copy-button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Meter } from "@/components/ui/data-table";
 import { Pill } from "@/components/ui/pill";
@@ -135,22 +136,35 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
           {signal.canonicalUrl ? (
             <Card>
               <CardHeader
-                title="Apply"
-                subtitle="Open the original listing to apply directly with the company."
+                title="Reply to this"
+                subtitle="A draft opener — copy it, open the thread, paste and personalise."
               />
-              <CardBody>
-                <a
-                  href={signal.canonicalUrl}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-accent/90"
-                >
-                  <ExternalLink aria-hidden="true" className="size-3.5" />
-                  Apply on {signal.sourceName}
-                </a>
+              <CardBody className="space-y-3">
+                {opportunity.strategy.suggestedMessage ? (
+                  <div className="rounded-tile bg-surface-2 px-3 py-2.5">
+                    <p className="whitespace-pre-wrap text-[12px] leading-relaxed text-fg-soft">
+                      {opportunity.strategy.suggestedMessage}
+                    </p>
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  {opportunity.strategy.suggestedMessage ? (
+                    <CopyButton text={opportunity.strategy.suggestedMessage} label="Copy draft" />
+                  ) : null}
+                  <a
+                    href={signal.canonicalUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-brand-bright"
+                  >
+                    <MessageSquare aria-hidden="true" className="size-3.5" />
+                    Open thread
+                    <ExternalLink aria-hidden="true" className="size-3" />
+                  </a>
+                </div>
                 {opportunity.strategy.evidenceUsed.length > 0 ? (
-                  <div className="mt-3 border-t border-line pt-3">
-                    <p className="text-[11px] font-medium text-fg-muted">Skills they mention</p>
+                  <div className="border-t border-line pt-3">
+                    <p className="text-[11px] font-medium text-fg-muted">Matched because</p>
                     <ul className="mt-1.5 space-y-1">
                       {opportunity.strategy.evidenceUsed.map((line) => (
                         <li key={line} className="text-[12px] leading-relaxed text-fg-muted">
