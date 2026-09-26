@@ -15,6 +15,29 @@ salesperson.
 DISCOVER → FILTER → SCORE → RESEARCH → QUALIFY → STRATEGIZE → ENGAGE → CLOSE → OUTCOME
 ```
 
+## Demo
+
+> Interactive terminal demo — [view the full case study](https://emmanuelzyronis.vercel.app/work/arkzen)
+
+```text
+$ node dist/scanner.js --source hn --limit 5
+
+ArkZen — lead acquisition workbench
+
+Signal: HN thread "Ask HN: Who is hiring?" (posted 4h ago)
+  Fit:          0.91  ✓  (TypeScript, backend, AI)
+  Intent:       0.95  ✓  (explicit hiring signal)
+  Urgency:      0.72  ✓  (recency)
+  Reachability: 0.88  ✓  (profile has email)
+  Score: 87/100 — PURSUE
+
+  Evidence:   "Looking for senior backend engineer, TypeScript + AI experience"
+  Inference:  Remote-friendly — no location constraint stated
+  Unknown:    Budget, team size, equity structure
+
+  → Staged for outreach review
+```
+
 ## The workflow
 
 1. **Discover** — source adapters pull candidate signals from public sources.

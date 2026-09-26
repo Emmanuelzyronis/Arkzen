@@ -104,7 +104,9 @@ export function ProfileEditor({ initialProfile }: { initialProfile: ProfileData 
           <CardHeader title="What you're looking for" subtitle="The profile behind every score and recommendation." />
           <CardBody className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-[12px] font-medium text-fg-muted">What you do</label>
+              <label className="mb-1.5 block text-[12px] font-medium text-fg-muted">
+                What you do <span className="text-down">*</span>
+              </label>
               <input
                 type="text"
                 value={profile.name}
@@ -257,7 +259,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: ProfileData 
 
         {/* Save */}
         <div className="flex items-center gap-3">
-          <Button variant="primary" size="md" onClick={handleSave} disabled={saving}>
+          <Button variant="primary" size="md" onClick={handleSave} disabled={saving || !profile.name.trim()}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
           {saved && <span className="text-[13px] text-up">Saved.</span>}

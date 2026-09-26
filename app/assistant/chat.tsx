@@ -75,7 +75,7 @@ export function AssistantChat({ initialMessages }: Props) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] flex-col rounded-card border border-line bg-surface shadow-card">
+    <div className="flex h-[calc(100dvh-120px)] flex-col rounded-card border border-line bg-surface shadow-card">
       {/* Message list */}
       <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
         {messages.length === 0 && (
